@@ -22,14 +22,14 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
-    this.soundManager = new SoundManager(this);
+        this.soundManager = new SoundManager(this);
 
-    const menuMusic = this.sound.get("menu_music");
-    if (menuMusic) {
-        menuMusic.stop();
-    }
+        const menuMusic = this.sound.get("menu_music");
+        if (menuMusic) {
+            menuMusic.stop();
+        }
 
-    this.soundManager.playMusic("game_music", 0.22);
+        this.soundManager.playMusic("game_music", 0.22);
 
         const { width, height } = this.scale;
 
@@ -93,6 +93,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.asteroidManager.start();
         this.parallaxManager = new ParallaxManager(this);
+
         this.physics.add.overlap(
             this.bullets,
             this.enemies,
@@ -101,18 +102,14 @@ export default class GameScene extends Phaser.Scene {
             this.collisionManager
         );
 
-        this.registerDevShortcuts();
-
         this.waveManager.start();
-        this.soundManager = new SoundManager(this);
-this.soundManager.playMusic("game_music", 0.22);
     }
 
     update() {
         const currentStage =
-    this.waveManager?.stage ||
-    this.registry.get("currentStage") ||
-    1;
+            this.waveManager?.stage ||
+            this.registry.get("currentStage") ||
+            1;
 
         if (currentStage === 1) {
             this.bg.tilePositionY -= 0.4;
@@ -212,56 +209,6 @@ this.soundManager.playMusic("game_music", 0.22);
                 rock.y = -60;
                 rock.x = Phaser.Math.Between(0, width);
             }
-        });
-    }
-
-    registerDevShortcuts() {
-        this.input.keyboard.on("keydown-U", () => {
-            if (this.upgradeManager?.openUpgradeSelection) {
-                this.upgradeManager.openUpgradeSelection(() => {
-                    console.log("Upgrade selected — dev test complete");
-                });
-            }
-        });
-
-        this.input.keyboard.on("keydown-K", () => {
-            if (this.bossManager?.activeBoss) {
-                this.bossManager.killBoss();
-            }
-        });
-
-        this.input.keyboard.on("keydown-N", () => {
-            this.waveManager.enemiesToSpawn = 0;
-            this.enemies.clear(true, true);
-            this.enemyBullets.clear(true, true);
-            this.waveManager.checkWaveComplete();
-        });
-
-        this.input.keyboard.on("keydown-B", () => {
-            this.waveManager.enemiesToSpawn = 0;
-            this.enemies.clear(true, true);
-            this.enemyBullets.clear(true, true);
-
-            this.waveManager.wave = 5;
-            this.waveManager.isWaveActive = false;
-            this.waveManager.waitingForBoss = true;
-
-            this.bossManager.startBossAlpha();
-        });
-
-        this.input.keyboard.on("keydown-P", () => {
-            this.powerUpManager.spawnReward(this.player.x - 60, this.player.y - 80, "shield");
-            this.powerUpManager.spawnReward(this.player.x + 60, this.player.y - 80, "double");
-        });
-
-        // DEV ONLY — spawn mine near player
-        this.input.keyboard.on("keydown-M", () => {
-            this.mineManager.spawnMine(this.player.x, this.player.y - 130);
-        });
-
-        // DEV ONLY — asteroid storm
-        this.input.keyboard.on("keydown-S", () => {
-            this.asteroidManager.startStorm();
         });
     }
 
