@@ -14,6 +14,75 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.moveSpeed = 0.14;
         this.maxTilt = 10;
         this.isHit = false;
+
+        this.isMobile =
+            scene.sys.game.device.input.touch ||
+            window.innerWidth <= 900;
+
+        this.isDragging = false;
+
+        this.lastPointerX = 0;
+        this.lastPointerY = 0;
+
+        this.targetX = x;
+        this.targetY = y;
+
+        this.touchSensitivity = 1.15;
+
+        if (this.isMobile) {
+            this.setupMobileControls();
+        }
+    }
+
+    setupMobileControls() {
+        this.scene.input.on("pointerdown", (pointer) => {
+            this.isDragging = true;
+
+            this.lastPointerX = pointer.worldX;
+            this.lastPointerY = pointer.worldY;
+
+            this.targetX = this.x;
+            this.targetY = this.y;
+        });
+
+        this.scene.input.on("pointermove", (pointer) => {
+            if (!this.isDragging || !pointer.isDown) return;
+
+            const deltaX = pointer.worldX - this.lastPointerX;
+            const deltaY = pointer.worldY - this.lastPointerY;
+
+            this.targetX += deltaX * this.touchSensitivity;
+            this.targetY += deltaY * this.touchSensitivity;
+
+            this.targetX = Phaser.Math.Clamp(
+                this.targetX,
+                55,
+                this.scene.scale.width - 55
+            );
+
+            this.targetY = Phaser.Math.Clamp(
+                this.targetY,
+                100,
+                this.scene.scale.height - 75
+            );
+
+            this.lastPointerX = pointer.worldX;
+            this.lastPointerY = pointer.worldY;
+        });
+
+        this.scene.input.on("pointerup", () => {
+            this.isDragging = false;
+
+            this.targetX = this.x;
+            this.targetY = this.y;
+        });
+
+        this.scene.input.on("pointerout", () => {
+            this.isDragging = false;
+
+            this.targetX = this.x;
+            this.targetY = this.y;
+        });
     }
 
     update(pointer) {
@@ -24,6 +93,57 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
         const oldX = this.x;
 
+        if (this.isMobile) {
+            this.updateMobileMovement();
+        } else {
+            this.updateDesktopMovement(pointer);
+        }
+
+        const deltaX = this.x - oldX;
+
+        const targetTilt = Phaser.Math.Clamp(
+            deltaX * 3,
+            -this.maxTilt,
+            this.maxTilt
+        );
+
+        this.angle = Phaser.Math.Linear(
+            this.angle,
+            targetTilt,
+            0.18
+        );
+
+        this.setVisible(true);
+        this.setAlpha(1);
+    }
+
+    updateMobileMovement() {
+        this.targetX = Phaser.Math.Clamp(
+            this.targetX,
+            55,
+            this.scene.scale.width - 55
+        );
+
+        this.targetY = Phaser.Math.Clamp(
+            this.targetY,
+            100,
+            this.scene.scale.height - 75
+        );
+
+        this.x = Phaser.Math.Linear(
+            this.x,
+            this.targetX,
+            0.32
+        );
+
+        this.y = Phaser.Math.Linear(
+            this.y,
+            this.targetY,
+            0.32
+        );
+    }
+
+    updateDesktopMovement(pointer) {
         const targetX = Phaser.Math.Clamp(
             pointer.worldX,
             80,
@@ -36,15 +156,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             this.scene.scale.height - 80
         );
 
-        this.x = Phaser.Math.Linear(this.x, targetX, this.moveSpeed);
-        this.y = Phaser.Math.Linear(this.y, targetY, this.moveSpeed);
+        this.x = Phaser.Math.Linear(
+            this.x,
+            targetX,
+            this.moveSpeed
+        );
 
-        const deltaX = this.x - oldX;
-        const targetTilt = Phaser.Math.Clamp(deltaX * 3, -this.maxTilt, this.maxTilt);
-
-        this.angle = Phaser.Math.Linear(this.angle, targetTilt, 0.18);
-
-        this.setVisible(true);
-        this.setAlpha(1);
+        this.y = Phaser.Math.Linear(
+            this.y,
+            targetY,
+            this.moveSpeed
+        );
     }
 }
