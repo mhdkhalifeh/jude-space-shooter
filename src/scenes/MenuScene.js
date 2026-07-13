@@ -11,6 +11,7 @@ export default class MenuScene extends Phaser.Scene {
         const h = this.scale.height;
 
         this.soundManager = new SoundManager(this);
+        this.fullscreenPromptOpen = false;
 
         this.cameras.main.setBackgroundColor("#020617");
 
@@ -26,6 +27,198 @@ export default class MenuScene extends Phaser.Scene {
         this.showButtons(w, h);
 
         this.soundManager.playMusic("menu_music", 0.35);
+    }
+
+    isMobileDevice() {
+        return this.sys.game.device.input.touch || window.innerWidth <= 900;
+    }
+
+    startNewGame() {
+        this.soundManager.stopMusic();
+
+        this.registry.set("currentStage", 1);
+        this.registry.set("checkpointStage", 1);
+        this.registry.set("checkpointWave", 1);
+        this.registry.set("checkpointScore", 0);
+
+        this.scene.start("GameScene");
+    }
+
+    showFullscreenPrompt() {
+        if (this.fullscreenPromptOpen) return;
+        this.fullscreenPromptOpen = true;
+
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        const overlay = this.add.rectangle(
+            w / 2,
+            h / 2,
+            w,
+            h,
+            0x020617,
+            0.88
+        )
+            .setDepth(200)
+            .setInteractive();
+
+        const panel = this.add.rectangle(
+            w / 2,
+            h / 2,
+            620,
+            360,
+            0x0f172a,
+            0.98
+        )
+            .setStrokeStyle(4, 0x38bdf8, 0.95)
+            .setDepth(201);
+
+        const title = this.add.text(
+            w / 2,
+            h / 2 - 115,
+            "FULL SCREEN",
+            {
+                fontSize: "48px",
+                color: "#38BDF8",
+                fontStyle: "bold",
+                stroke: "#020617",
+                strokeThickness: 7
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(202);
+
+        const message = this.add.text(
+            w / 2,
+            h / 2 - 45,
+            "For the best mobile experience,\nplay in full screen mode.",
+            {
+                fontSize: "25px",
+                color: "#E2E8F0",
+                align: "center",
+                lineSpacing: 10,
+                stroke: "#020617",
+                strokeThickness: 4
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(202);
+
+        let enterButton;
+        let skipButton;
+
+        enterButton = this.createPromptButton(
+            w / 2,
+            h / 2 + 55,
+            "ENTER FULLSCREEN",
+            "#22C55E",
+            () => {
+                this.soundManager.sfx("button", 0.5);
+
+                const fullscreenAvailable =
+                    this.sys.game.device.fullscreen?.available === true;
+
+                if (fullscreenAvailable && !this.scale.isFullscreen) {
+                    try {
+                        this.scale.startFullscreen();
+                    } catch (error) {
+                        console.warn("Fullscreen could not start:", error);
+                    }
+                }
+
+                this.destroyFullscreenPrompt(
+                    overlay,
+                    panel,
+                    title,
+                    message,
+                    enterButton,
+                    skipButton
+                );
+
+                this.time.delayedCall(180, () => {
+                    this.startNewGame();
+                });
+            }
+        );
+
+        skipButton = this.createPromptButton(
+            w / 2,
+            h / 2 + 130,
+            "SKIP",
+            "#94A3B8",
+            () => {
+                this.soundManager.sfx("button", 0.45);
+
+                this.destroyFullscreenPrompt(
+                    overlay,
+                    panel,
+                    title,
+                    message,
+                    enterButton,
+                    skipButton
+                );
+
+                this.startNewGame();
+            }
+        );
+
+        this.tweens.add({
+            targets: [panel, title, message, enterButton, skipButton],
+            alpha: { from: 0, to: 1 },
+            scaleX: { from: 0.94, to: 1 },
+            scaleY: { from: 0.94, to: 1 },
+            duration: 220,
+            ease: "Back.easeOut"
+        });
+    }
+
+    destroyFullscreenPrompt(...objects) {
+        objects.forEach((object) => {
+            if (object?.active) {
+                object.destroy();
+            }
+        });
+
+        this.fullscreenPromptOpen = false;
+    }
+
+    createPromptButton(x, y, text, color, callback) {
+        const button = this.add.text(
+            x,
+            y,
+            text,
+            {
+                fontSize: "28px",
+                color,
+                fontStyle: "bold",
+                backgroundColor: "#111827",
+                padding: {
+                    left: 28,
+                    right: 28,
+                    top: 14,
+                    bottom: 14
+                },
+                stroke: "#020617",
+                strokeThickness: 5
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(203)
+            .setInteractive({ useHandCursor: true });
+
+        button.on("pointerover", () => {
+            button.setScale(1.06);
+            button.setColor("#FACC15");
+        });
+
+        button.on("pointerout", () => {
+            button.setScale(1);
+            button.setColor(color);
+        });
+
+        button.on("pointerdown", callback);
+
+        return button;
     }
 
     showTitle(w, h) {
@@ -59,14 +252,13 @@ export default class MenuScene extends Phaser.Scene {
     showButtons(w, h) {
         this.createButton(w / 2, 310, "NEW GAME", () => {
             this.soundManager.sfx("button", 0.5);
-            this.soundManager.stopMusic();
 
-            this.registry.set("currentStage", 1);
-            this.registry.set("checkpointStage", 1);
-            this.registry.set("checkpointWave", 1);
-            this.registry.set("checkpointScore", 0);
+            if (this.isMobileDevice() && !this.scale.isFullscreen) {
+                this.showFullscreenPrompt();
+                return;
+            }
 
-            this.scene.start("GameScene");
+            this.startNewGame();
         });
 
         this.createButton(w / 2, 390, "INFORMATION", () => {
@@ -178,55 +370,13 @@ export default class MenuScene extends Phaser.Scene {
 
     spawnBackgroundObject(w, h) {
         const formations = [
-            {
-                key: "enemy_scout",
-                count: 3,
-                scale: 0.055,
-                alpha: 0.18,
-                speed: 9000
-            },
-            {
-                key: "enemy_fighter",
-                count: 2,
-                scale: 0.06,
-                alpha: 0.16,
-                speed: 10500
-            },
-            {
-                key: "enemy_interceptor",
-                count: 2,
-                scale: 0.05,
-                alpha: 0.18,
-                speed: 7600
-            },
-            {
-                key: "enemy_bomber",
-                count: 1,
-                scale: 0.075,
-                alpha: 0.14,
-                speed: 13500
-            },
-            {
-                key: "boss_alpha",
-                count: 1,
-                scale: 0.09,
-                alpha: 0.10,
-                speed: 17000
-            },
-            {
-                key: "boss_omega",
-                count: 1,
-                scale: 0.085,
-                alpha: 0.10,
-                speed: 18000
-            },
-            {
-                key: "boss_leviathan",
-                count: 1,
-                scale: 0.075,
-                alpha: 0.10,
-                speed: 20000
-            }
+            { key: "enemy_scout", count: 3, scale: 0.055, alpha: 0.18, speed: 9000 },
+            { key: "enemy_fighter", count: 2, scale: 0.06, alpha: 0.16, speed: 10500 },
+            { key: "enemy_interceptor", count: 2, scale: 0.05, alpha: 0.18, speed: 7600 },
+            { key: "enemy_bomber", count: 1, scale: 0.075, alpha: 0.14, speed: 13500 },
+            { key: "boss_alpha", count: 1, scale: 0.09, alpha: 0.10, speed: 17000 },
+            { key: "boss_omega", count: 1, scale: 0.085, alpha: 0.10, speed: 18000 },
+            { key: "boss_leviathan", count: 1, scale: 0.075, alpha: 0.10, speed: 20000 }
         ].filter(item => this.textures.exists(item.key));
 
         if (formations.length === 0) return;
