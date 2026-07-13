@@ -8,28 +8,12 @@ export default class ShootingManager {
         this.isFiring = false;
         this.lastLaserSfxTime = 0;
 
-        this.isMobile =
-            this.scene.sys.game.device.input.touch ||
-            window.innerWidth <= 900;
-
-        if (this.isMobile) {
-            this.isFiring = true;
-        }
-
         this.scene.input.on("pointerdown", () => {
             this.isFiring = true;
         });
 
         this.scene.input.on("pointerup", () => {
-            if (!this.isMobile) {
-                this.isFiring = false;
-            }
-        });
-
-        this.scene.input.on("pointerout", () => {
-            if (!this.isMobile) {
-                this.isFiring = false;
-            }
+            this.isFiring = false;
         });
     }
 
@@ -42,8 +26,6 @@ export default class ShootingManager {
 
     handlePlayerShooting() {
         if (!this.isFiring) return;
-        if (!this.scene.player?.active) return;
-        if (this.scene.isGameOver) return;
 
         const fireDelay = this.scene.upgradeManager?.getFireRate?.() ?? 180;
 
@@ -89,7 +71,7 @@ export default class ShootingManager {
 
         if (this.scene.time.now <= this.lastLaserSfxTime + 90) return;
 
-        this.scene.soundManager.sfx("laser", this.isMobile ? 0.18 : 0.22);
+        this.scene.soundManager.sfx("laser", 0.22);
         this.lastLaserSfxTime = this.scene.time.now;
     }
 

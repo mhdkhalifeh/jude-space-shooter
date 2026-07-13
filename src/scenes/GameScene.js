@@ -15,6 +15,7 @@ import UpgradeManager from "../managers/UpgradeManager";
 import AsteroidManager from "../managers/AsteroidManager";
 import MineManager from "../managers/MineManager";
 import SoundManager from "../managers/SoundManager";
+import PauseMenu from "../ui/PauseMenu";
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -34,6 +35,7 @@ export default class GameScene extends Phaser.Scene {
         const { width, height } = this.scale;
 
         this.isGameOver = false;
+        this.isPausedByMenu = false;
         this.stageEnvironment = this.registry.get("currentStage") || 1;
 
         this.checkpointManager = new CheckpointManager(this);
@@ -102,10 +104,18 @@ export default class GameScene extends Phaser.Scene {
             this.collisionManager
         );
 
+        this.pauseMenu = new PauseMenu(this);
+
+        this.events.once("shutdown", () => {
+            this.pauseMenu?.destroy();
+        });
+
         this.waveManager.start();
     }
 
     update() {
+        if (this.isPausedByMenu) return;
+
         const currentStage =
             this.waveManager?.stage ||
             this.registry.get("currentStage") ||
@@ -243,7 +253,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     enemyEscaped(enemy) {
-        if (this.isGameOver) return;
+        if (this.isGameOver || this.isPausedByMenu) return;
 
         this.damagePlayer();
 
@@ -253,7 +263,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     damagePlayer() {
-        if (this.playerInvincible || this.isGameOver) return;
+        if (this.playerInvincible || this.isGameOver || this.isPausedByMenu) return;
 
         if (this.powerUpManager?.hasShield?.()) {
             this.powerUpManager.breakShield();
@@ -294,6 +304,7 @@ export default class GameScene extends Phaser.Scene {
 
     triggerGameOver() {
         this.isGameOver = true;
+        this.pauseMenu?.pauseButton?.setVisible(false);
         this.waveManager.stop();
 
         this.add.text(this.scale.width / 2, this.scale.height / 2 - 30, "GAME OVER", {
