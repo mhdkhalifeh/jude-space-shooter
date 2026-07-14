@@ -30,7 +30,10 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     isMobileDevice() {
-        return this.sys.game.device.input.touch || window.innerWidth <= 900;
+        return (
+            this.sys.game.device.input.touch ||
+            window.innerWidth <= 900
+        );
     }
 
     startNewGame() {
@@ -42,6 +45,11 @@ export default class MenuScene extends Phaser.Scene {
         this.registry.set("checkpointScore", 0);
 
         this.scene.start("GameScene");
+    }
+
+    openProfile() {
+        this.soundManager.sfx("button", 0.5);
+        this.scene.start("ProfileScene");
     }
 
     showFullscreenPrompt() {
@@ -163,7 +171,13 @@ export default class MenuScene extends Phaser.Scene {
         );
 
         this.tweens.add({
-            targets: [panel, title, message, enterButton, skipButton],
+            targets: [
+                panel,
+                title,
+                message,
+                enterButton,
+                skipButton
+            ],
             alpha: { from: 0, to: 1 },
             scaleX: { from: 0.94, to: 1 },
             scaleY: { from: 0.94, to: 1 },
@@ -222,21 +236,35 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     showTitle(w, h) {
-        const jude = this.add.text(w / 2, 105, "JUDE", {
-            fontSize: "82px",
-            color: "#38BDF8",
-            fontStyle: "bold",
-            stroke: "#020617",
-            strokeThickness: 9
-        }).setOrigin(0.5).setDepth(20);
+        const jude = this.add.text(
+            w / 2,
+            105,
+            "JUDE",
+            {
+                fontSize: "82px",
+                color: "#38BDF8",
+                fontStyle: "bold",
+                stroke: "#020617",
+                strokeThickness: 9
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(20);
 
-        const subtitle = this.add.text(w / 2, 170, "SPACE SHOOTER", {
-            fontSize: "42px",
-            color: "#FFFFFF",
-            fontStyle: "bold",
-            stroke: "#020617",
-            strokeThickness: 7
-        }).setOrigin(0.5).setDepth(20);
+        const subtitle = this.add.text(
+            w / 2,
+            170,
+            "SPACE SHOOTER",
+            {
+                fontSize: "42px",
+                color: "#FFFFFF",
+                fontStyle: "bold",
+                stroke: "#020617",
+                strokeThickness: 7
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(20);
 
         this.tweens.add({
             targets: [jude, subtitle],
@@ -250,39 +278,81 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     showButtons(w, h) {
-        this.createButton(w / 2, 310, "NEW GAME", () => {
-            this.soundManager.sfx("button", 0.5);
+        this.createButton(
+            w / 2,
+            300,
+            "NEW GAME",
+            () => {
+                this.soundManager.sfx("button", 0.5);
 
-            if (this.isMobileDevice() && !this.scale.isFullscreen) {
-                this.showFullscreenPrompt();
-                return;
+                if (
+                    this.isMobileDevice() &&
+                    !this.scale.isFullscreen
+                ) {
+                    this.showFullscreenPrompt();
+                    return;
+                }
+
+                this.startNewGame();
             }
+        );
 
-            this.startNewGame();
-        });
+        this.createButton(
+            w / 2,
+            375,
+            "PLAYER PROFILE",
+            () => {
+                this.openProfile();
+            },
+            "#38BDF8"
+        );
 
-        this.createButton(w / 2, 390, "INFORMATION", () => {
-            this.soundManager.sfx("button", 0.5);
-            this.scene.start("InfoScene");
-        });
+        this.createButton(
+            w / 2,
+            450,
+            "INFORMATION",
+            () => {
+                this.soundManager.sfx("button", 0.5);
+                this.scene.start("InfoScene");
+            },
+            "#A78BFA"
+        );
 
-        this.add.text(w / 2, h - 55, "Version Beta 1.0\n© 2026 JUDE PLAY", {
-            fontSize: "20px",
-            color: "#94A3B8",
-            align: "center",
-            stroke: "#020617",
-            strokeThickness: 3
-        }).setOrigin(0.5).setDepth(20);
+        this.add.text(
+            w / 2,
+            h - 55,
+            "Version Beta 1.0\n© 2026 JUDE PLAY",
+            {
+                fontSize: "20px",
+                color: "#94A3B8",
+                align: "center",
+                stroke: "#020617",
+                strokeThickness: 3
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(20);
     }
 
-    createButton(x, y, text, callback) {
-        const btn = this.add.text(x, y, text, {
-            fontSize: "34px",
-            color: "#22C55E",
-            fontStyle: "bold",
-            stroke: "#020617",
-            strokeThickness: 6
-        })
+    createButton(
+        x,
+        y,
+        text,
+        callback,
+        baseColor = "#22C55E"
+    ) {
+        const btn = this.add.text(
+            x,
+            y,
+            text,
+            {
+                fontSize: "34px",
+                color: baseColor,
+                fontStyle: "bold",
+                stroke: "#020617",
+                strokeThickness: 6
+            }
+        )
             .setOrigin(0.5)
             .setDepth(20)
             .setInteractive({ useHandCursor: true });
@@ -294,7 +364,7 @@ export default class MenuScene extends Phaser.Scene {
 
         btn.on("pointerout", () => {
             btn.setScale(1);
-            btn.setColor("#22C55E");
+            btn.setColor(baseColor);
         });
 
         btn.on("pointerdown", callback);
@@ -334,7 +404,11 @@ export default class MenuScene extends Phaser.Scene {
 
         if (!texture) return;
 
-        const ship = this.add.image(w / 2, h - 135, texture)
+        const ship = this.add.image(
+            w / 2,
+            h - 135,
+            texture
+        )
             .setScale(0.18)
             .setAlpha(0.92)
             .setDepth(15);
@@ -354,48 +428,121 @@ export default class MenuScene extends Phaser.Scene {
         this.time.addEvent({
             delay: 3200,
             loop: true,
-            callback: () => this.spawnBackgroundObject(w, h)
+            callback: () =>
+                this.spawnBackgroundObject(w, h)
         });
 
         this.time.addEvent({
             delay: 2600,
             loop: true,
-            callback: () => this.spawnShootingStar(w, h)
+            callback: () =>
+                this.spawnShootingStar(w, h)
         });
 
         for (let i = 0; i < 3; i++) {
-            this.time.delayedCall(i * 1600, () => this.spawnBackgroundObject(w, h));
+            this.time.delayedCall(
+                i * 1600,
+                () =>
+                    this.spawnBackgroundObject(w, h)
+            );
         }
     }
 
     spawnBackgroundObject(w, h) {
         const formations = [
-            { key: "enemy_scout", count: 3, scale: 0.055, alpha: 0.18, speed: 9000 },
-            { key: "enemy_fighter", count: 2, scale: 0.06, alpha: 0.16, speed: 10500 },
-            { key: "enemy_interceptor", count: 2, scale: 0.05, alpha: 0.18, speed: 7600 },
-            { key: "enemy_bomber", count: 1, scale: 0.075, alpha: 0.14, speed: 13500 },
-            { key: "boss_alpha", count: 1, scale: 0.09, alpha: 0.10, speed: 17000 },
-            { key: "boss_omega", count: 1, scale: 0.085, alpha: 0.10, speed: 18000 },
-            { key: "boss_leviathan", count: 1, scale: 0.075, alpha: 0.10, speed: 20000 }
-        ].filter(item => this.textures.exists(item.key));
+            {
+                key: "enemy_scout",
+                count: 3,
+                scale: 0.055,
+                alpha: 0.18,
+                speed: 9000
+            },
+            {
+                key: "enemy_fighter",
+                count: 2,
+                scale: 0.06,
+                alpha: 0.16,
+                speed: 10500
+            },
+            {
+                key: "enemy_interceptor",
+                count: 2,
+                scale: 0.05,
+                alpha: 0.18,
+                speed: 7600
+            },
+            {
+                key: "enemy_bomber",
+                count: 1,
+                scale: 0.075,
+                alpha: 0.14,
+                speed: 13500
+            },
+            {
+                key: "boss_alpha",
+                count: 1,
+                scale: 0.09,
+                alpha: 0.10,
+                speed: 17000
+            },
+            {
+                key: "boss_omega",
+                count: 1,
+                scale: 0.085,
+                alpha: 0.10,
+                speed: 18000
+            },
+            {
+                key: "boss_leviathan",
+                count: 1,
+                scale: 0.075,
+                alpha: 0.10,
+                speed: 20000
+            }
+        ].filter((item) =>
+            this.textures.exists(item.key)
+        );
 
         if (formations.length === 0) return;
 
-        const picked = Phaser.Utils.Array.GetRandom(formations);
+        const picked =
+            Phaser.Utils.Array.GetRandom(formations);
 
-        const startFromLeft = Phaser.Math.Between(0, 1) === 0;
-        const startX = startFromLeft ? -180 : w + 180;
-        const endX = startFromLeft ? w + 180 : -180;
+        const startFromLeft =
+            Phaser.Math.Between(0, 1) === 0;
 
-        const baseY = Phaser.Math.Between(80, h - 180);
-        const driftY = Phaser.Math.Between(-90, 90);
+        const startX =
+            startFromLeft ? -180 : w + 180;
 
-        for (let i = 0; i < picked.count; i++) {
-            const offsetX = i * Phaser.Math.Between(55, 85);
-            const offsetY = (i - Math.floor(picked.count / 2)) * 42;
+        const endX =
+            startFromLeft ? w + 180 : -180;
+
+        const baseY =
+            Phaser.Math.Between(80, h - 180);
+
+        const driftY =
+            Phaser.Math.Between(-90, 90);
+
+        for (
+            let i = 0;
+            i < picked.count;
+            i++
+        ) {
+            const offsetX =
+                i *
+                Phaser.Math.Between(55, 85);
+
+            const offsetY =
+                (i -
+                    Math.floor(
+                        picked.count / 2
+                    )) *
+                42;
 
             const sprite = this.add.image(
-                startFromLeft ? startX - offsetX : startX + offsetX,
+                startFromLeft
+                    ? startX - offsetX
+                    : startX + offsetX,
                 baseY + offsetY,
                 picked.key
             )
@@ -403,22 +550,49 @@ export default class MenuScene extends Phaser.Scene {
                 .setAlpha(picked.alpha)
                 .setDepth(3);
 
-            sprite.setAngle(startFromLeft ? 90 : -90);
+            sprite.setAngle(
+                startFromLeft ? 90 : -90
+            );
 
             this.tweens.add({
                 targets: sprite,
                 x: endX,
-                y: baseY + driftY + offsetY,
-                alpha: picked.alpha * 0.65,
-                duration: picked.speed + Phaser.Math.Between(-1200, 1200),
+                y:
+                    baseY +
+                    driftY +
+                    offsetY,
+                alpha:
+                    picked.alpha * 0.65,
+                duration:
+                    picked.speed +
+                    Phaser.Math.Between(
+                        -1200,
+                        1200
+                    ),
                 ease: "Sine.easeInOut",
-                onComplete: () => sprite.destroy()
+                onComplete: () =>
+                    sprite.destroy()
             });
 
-            if (picked.key.startsWith("enemy_")) {
-                this.time.delayedCall(Phaser.Math.Between(1200, 2600), () => {
-                    if (sprite.active) this.fireDistantLaser(sprite, startFromLeft);
-                });
+            if (
+                picked.key.startsWith(
+                    "enemy_"
+                )
+            ) {
+                this.time.delayedCall(
+                    Phaser.Math.Between(
+                        1200,
+                        2600
+                    ),
+                    () => {
+                        if (sprite.active) {
+                            this.fireDistantLaser(
+                                sprite,
+                                startFromLeft
+                            );
+                        }
+                    }
+                );
             }
         }
     }
@@ -433,15 +607,24 @@ export default class MenuScene extends Phaser.Scene {
             0.22
         ).setDepth(2);
 
-        laser.rotation = fromLeft ? 0.18 : -0.18;
+        laser.rotation =
+            fromLeft ? 0.18 : -0.18;
 
         this.tweens.add({
             targets: laser,
-            x: laser.x + (fromLeft ? 180 : -180),
-            y: laser.y + Phaser.Math.Between(20, 70),
+            x:
+                laser.x +
+                (fromLeft ? 180 : -180),
+            y:
+                laser.y +
+                Phaser.Math.Between(
+                    20,
+                    70
+                ),
             alpha: 0,
             duration: 900,
-            onComplete: () => laser.destroy()
+            onComplete: () =>
+                laser.destroy()
         });
     }
 
@@ -456,21 +639,45 @@ export default class MenuScene extends Phaser.Scene {
 
         this.tweens.add({
             targets: star,
-            x: star.x + Phaser.Math.Between(220, 420),
-            y: star.y + Phaser.Math.Between(120, 260),
+            x:
+                star.x +
+                Phaser.Math.Between(
+                    220,
+                    420
+                ),
+            y:
+                star.y +
+                Phaser.Math.Between(
+                    120,
+                    260
+                ),
             alpha: 0,
-            duration: Phaser.Math.Between(650, 1100),
-            onComplete: () => star.destroy()
+            duration:
+                Phaser.Math.Between(
+                    650,
+                    1100
+                ),
+            onComplete: () =>
+                star.destroy()
         });
     }
 
     pickWeighted(items) {
-        const total = items.reduce((sum, item) => sum + item.weight, 0);
-        let roll = Math.random() * total;
+        const total = items.reduce(
+            (sum, item) =>
+                sum + item.weight,
+            0
+        );
+
+        let roll =
+            Math.random() * total;
 
         for (const item of items) {
             roll -= item.weight;
-            if (roll <= 0) return item;
+
+            if (roll <= 0) {
+                return item;
+            }
         }
 
         return items[0];

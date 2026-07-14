@@ -15,6 +15,8 @@ import UpgradeManager from "../managers/UpgradeManager";
 import AsteroidManager from "../managers/AsteroidManager";
 import MineManager from "../managers/MineManager";
 import SoundManager from "../managers/SoundManager";
+import SaveManager from "../managers/SaveManager";
+import AchievementManager from "../managers/AchievementManager";
 import PauseMenu from "../ui/PauseMenu";
 
 export default class GameScene extends Phaser.Scene {
@@ -24,8 +26,13 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
         this.soundManager = new SoundManager(this);
+        this.saveManager = new SaveManager(this);
+        this.achievementManager = new AchievementManager(this);
+
+        this.saveManager.startRun();
 
         const menuMusic = this.sound.get("menu_music");
+
         if (menuMusic) {
             menuMusic.stop();
         }
@@ -36,12 +43,18 @@ export default class GameScene extends Phaser.Scene {
 
         this.isGameOver = false;
         this.isPausedByMenu = false;
-        this.stageEnvironment = this.registry.get("currentStage") || 1;
+        this.stageEnvironment =
+            this.registry.get("currentStage") || 1;
 
-        this.checkpointManager = new CheckpointManager(this);
-        this.upgradeManager = new UpgradeManager(this);
+        this.checkpointManager =
+            new CheckpointManager(this);
 
-        this.score = this.checkpointManager.getStartScore();
+        this.upgradeManager =
+            new UpgradeManager(this);
+
+        this.score =
+            this.checkpointManager.getStartScore();
+
         this.playerHP = 3;
         this.playerInvincible = false;
 
@@ -53,14 +66,15 @@ export default class GameScene extends Phaser.Scene {
             "background_space"
         );
 
-        this.stage2Overlay = this.add.rectangle(
-            width / 2,
-            height / 2,
-            width,
-            height,
-            0x4c1d95,
-            0
-        ).setDepth(1);
+        this.stage2Overlay =
+            this.add.rectangle(
+                width / 2,
+                height / 2,
+                width,
+                height,
+                0x4c1d95,
+                0
+            ).setDepth(1);
 
         this.spaceDust = this.add.group();
         this.farAsteroids = this.add.group();
@@ -68,7 +82,12 @@ export default class GameScene extends Phaser.Scene {
         this.createSpaceDust();
         this.createFarAsteroids();
 
-        this.player = new Player(this, width / 2, height - 180);
+        this.player =
+            new Player(
+                this,
+                width / 2,
+                height - 180
+            );
 
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
@@ -94,12 +113,15 @@ export default class GameScene extends Phaser.Scene {
         this.mineManager = new MineManager(this);
 
         this.asteroidManager.start();
-        this.parallaxManager = new ParallaxManager(this);
+
+        this.parallaxManager =
+            new ParallaxManager(this);
 
         this.physics.add.overlap(
             this.bullets,
             this.enemies,
-            this.collisionManager.handleBulletEnemyCollision,
+            this.collisionManager
+                .handleBulletEnemyCollision,
             null,
             this.collisionManager
         );
@@ -111,6 +133,7 @@ export default class GameScene extends Phaser.Scene {
         });
 
         this.waveManager.start();
+        this.achievementManager.check();
     }
 
     update() {
@@ -131,7 +154,10 @@ export default class GameScene extends Phaser.Scene {
 
         if (this.isGameOver) return;
 
-        this.player.update(this.input.activePointer);
+        this.player.update(
+            this.input.activePointer
+        );
+
         this.parallaxManager.update();
         this.shootingManager.update();
         this.enemyManager.update();
@@ -141,6 +167,7 @@ export default class GameScene extends Phaser.Scene {
         this.waveManager.update();
         this.asteroidManager.update();
         this.mineManager.update();
+        this.achievementManager.update();
 
         this.checkBossBulletHits();
     }
@@ -157,7 +184,12 @@ export default class GameScene extends Phaser.Scene {
                 Phaser.Math.FloatBetween(0.05, 0.16)
             ).setDepth(2);
 
-            dust.speed = Phaser.Math.FloatBetween(0.35, 1.2);
+            dust.speed =
+                Phaser.Math.FloatBetween(
+                    0.35,
+                    1.2
+                );
+
             this.spaceDust.add(dust);
         }
     }
@@ -171,11 +203,23 @@ export default class GameScene extends Phaser.Scene {
                 Phaser.Math.Between(0, height),
                 Phaser.Math.Between(8, 22),
                 0x1f2937,
-                Phaser.Math.FloatBetween(0.16, 0.32)
+                Phaser.Math.FloatBetween(
+                    0.16,
+                    0.32
+                )
             ).setDepth(3);
 
-            rock.speed = Phaser.Math.FloatBetween(0.25, 0.75);
-            rock.spin = Phaser.Math.FloatBetween(-0.01, 0.01);
+            rock.speed =
+                Phaser.Math.FloatBetween(
+                    0.25,
+                    0.75
+                );
+
+            rock.spin =
+                Phaser.Math.FloatBetween(
+                    -0.01,
+                    0.01
+                );
 
             this.farAsteroids.add(rock);
         }
@@ -184,105 +228,192 @@ export default class GameScene extends Phaser.Scene {
     updateStageEnvironment(currentStage) {
         const { width, height } = this.scale;
 
-        const targetAlpha = currentStage === 2 ? 0.34 : 0;
+        const targetAlpha =
+            currentStage === 2 ? 0.34 : 0;
 
-        if (this.stage2Overlay.alpha !== targetAlpha) {
-            this.stage2Overlay.alpha = Phaser.Math.Linear(
-                this.stage2Overlay.alpha,
-                targetAlpha,
-                0.035
-            );
+        if (
+            this.stage2Overlay.alpha !==
+            targetAlpha
+        ) {
+            this.stage2Overlay.alpha =
+                Phaser.Math.Linear(
+                    this.stage2Overlay.alpha,
+                    targetAlpha,
+                    0.035
+                );
         }
 
-        this.spaceDust.getChildren().forEach((dust) => {
-            dust.alpha = currentStage === 2
-                ? Phaser.Math.Clamp(dust.alpha + 0.002, 0.08, 0.26)
-                : Phaser.Math.Clamp(dust.alpha - 0.004, 0, 0.14);
+        this.spaceDust
+            .getChildren()
+            .forEach((dust) => {
+                dust.alpha =
+                    currentStage === 2
+                        ? Phaser.Math.Clamp(
+                              dust.alpha + 0.002,
+                              0.08,
+                              0.26
+                          )
+                        : Phaser.Math.Clamp(
+                              dust.alpha - 0.004,
+                              0,
+                              0.14
+                          );
 
-            dust.y += currentStage === 2 ? dust.speed * 2.4 : dust.speed;
+                dust.y +=
+                    currentStage === 2
+                        ? dust.speed * 2.4
+                        : dust.speed;
 
-            if (dust.y > height + 10) {
-                dust.y = -10;
-                dust.x = Phaser.Math.Between(0, width);
-            }
-        });
+                if (dust.y > height + 10) {
+                    dust.y = -10;
+                    dust.x =
+                        Phaser.Math.Between(
+                            0,
+                            width
+                        );
+                }
+            });
 
-        this.farAsteroids.getChildren().forEach((rock) => {
-            rock.alpha = currentStage === 2
-                ? Phaser.Math.Clamp(rock.alpha + 0.003, 0.18, 0.38)
-                : Phaser.Math.Clamp(rock.alpha - 0.004, 0, 0.2);
+        this.farAsteroids
+            .getChildren()
+            .forEach((rock) => {
+                rock.alpha =
+                    currentStage === 2
+                        ? Phaser.Math.Clamp(
+                              rock.alpha + 0.003,
+                              0.18,
+                              0.38
+                          )
+                        : Phaser.Math.Clamp(
+                              rock.alpha - 0.004,
+                              0,
+                              0.2
+                          );
 
-            rock.y += currentStage === 2 ? rock.speed * 2.2 : rock.speed * 0.45;
-            rock.rotation += rock.spin;
+                rock.y +=
+                    currentStage === 2
+                        ? rock.speed * 2.2
+                        : rock.speed * 0.45;
 
-            if (rock.y > height + 60) {
-                rock.y = -60;
-                rock.x = Phaser.Math.Between(0, width);
-            }
-        });
+                rock.rotation += rock.spin;
+
+                if (rock.y > height + 60) {
+                    rock.y = -60;
+                    rock.x =
+                        Phaser.Math.Between(
+                            0,
+                            width
+                        );
+                }
+            });
     }
 
     checkBossBulletHits() {
-        const boss = this.bossManager?.activeBoss;
+        const boss =
+            this.bossManager?.activeBoss;
 
-        if (!boss || !boss.active || boss.isDead) return;
+        if (
+            !boss ||
+            !boss.active ||
+            boss.isDead
+        ) return;
 
-        this.bullets.getChildren().forEach((bullet) => {
-            if (!bullet.active) return;
+        this.bullets
+            .getChildren()
+            .forEach((bullet) => {
+                if (!bullet.active) return;
 
-            const currentBoss = this.bossManager?.activeBoss;
+                const currentBoss =
+                    this.bossManager
+                        ?.activeBoss;
 
-            if (!currentBoss || !currentBoss.active || currentBoss.isDead) return;
+                if (
+                    !currentBoss ||
+                    !currentBoss.active ||
+                    currentBoss.isDead
+                ) return;
 
-            const distance = Phaser.Math.Distance.Between(
-                bullet.x,
-                bullet.y,
-                currentBoss.x,
-                currentBoss.y
-            );
+                const distance =
+                    Phaser.Math.Distance.Between(
+                        bullet.x,
+                        bullet.y,
+                        currentBoss.x,
+                        currentBoss.y
+                    );
 
-            if (distance < 210) {
-                this.bossManager.damageBoss(bullet);
-            }
-        });
+                if (distance < 210) {
+                    this.bossManager
+                        .damageBoss(bullet);
+                }
+            });
     }
 
     addScore(amount) {
         this.score += amount;
         this.hud.updateScore(this.score);
+
+        this.saveManager?.updateHighScore(
+            this.score
+        );
+
+        this.achievementManager?.check();
     }
 
     enemyEscaped(enemy) {
-        if (this.isGameOver || this.isPausedByMenu) return;
+        if (
+            this.isGameOver ||
+            this.isPausedByMenu
+        ) return;
 
         this.damagePlayer();
 
         this.time.delayedCall(50, () => {
-            this.waveManager?.checkWaveComplete?.();
+            this.waveManager
+                ?.checkWaveComplete?.();
         });
     }
 
     damagePlayer() {
-        if (this.playerInvincible || this.isGameOver || this.isPausedByMenu) return;
+        if (
+            this.playerInvincible ||
+            this.isGameOver ||
+            this.isPausedByMenu
+        ) return;
 
-        if (this.powerUpManager?.hasShield?.()) {
-            this.powerUpManager.breakShield();
+        if (
+            this.powerUpManager
+                ?.hasShield?.()
+        ) {
+            this.powerUpManager
+                .breakShield();
+
             return;
         }
 
-        this.playerHP = Math.max(0, this.playerHP - 1);
+        this.playerHP =
+            Math.max(
+                0,
+                this.playerHP - 1
+            );
+
+        this.saveManager?.addDamageTaken();
         this.hud.updateHP(this.playerHP);
 
         this.playerInvincible = true;
-        this.cameras.main.shake(90, 0.005);
 
-        const hitFlash = this.add.circle(
-            this.player.x,
-            this.player.y,
-            35,
-            0xff3333,
-            0.6
-        ).setDepth(30);
+        this.cameras.main.shake(
+            90,
+            0.005
+        );
+
+        const hitFlash =
+            this.add.circle(
+                this.player.x,
+                this.player.y,
+                35,
+                0xff3333,
+                0.6
+            ).setDepth(30);
 
         this.tweens.add({
             targets: hitFlash,
@@ -290,7 +421,8 @@ export default class GameScene extends Phaser.Scene {
             alpha: 0,
             duration: 250,
             ease: "Quad.easeOut",
-            onComplete: () => hitFlash.destroy()
+            onComplete: () =>
+                hitFlash.destroy()
         });
 
         this.time.delayedCall(700, () => {
@@ -303,27 +435,68 @@ export default class GameScene extends Phaser.Scene {
     }
 
     triggerGameOver() {
+        if (this.isGameOver) return;
+
+        this.saveManager?.endRun({
+            score: this.score,
+            stage:
+                this.waveManager?.stage || 1,
+            wave:
+                this.waveManager?.wave || 1
+        });
+
+        this.achievementManager?.check();
+
         this.isGameOver = true;
-        this.pauseMenu?.pauseButton?.setVisible(false);
+
+        this.pauseMenu
+            ?.pauseButton
+            ?.setVisible(false);
+
         this.waveManager.stop();
 
-        this.add.text(this.scale.width / 2, this.scale.height / 2 - 30, "GAME OVER", {
-            fontSize: "64px",
-            color: "#ff4444"
-        }).setOrigin(0.5).setDepth(100);
+        this.add.text(
+            this.scale.width / 2,
+            this.scale.height / 2 - 30,
+            "GAME OVER",
+            {
+                fontSize: "64px",
+                color: "#ff4444"
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(100);
 
-        this.add.text(this.scale.width / 2, this.scale.height / 2 + 35, `SCORE: ${this.score}`, {
-            fontSize: "30px",
-            color: "#38BDF8"
-        }).setOrigin(0.5).setDepth(100);
+        this.add.text(
+            this.scale.width / 2,
+            this.scale.height / 2 + 35,
+            `SCORE: ${this.score}`,
+            {
+                fontSize: "30px",
+                color: "#38BDF8"
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(100);
 
-        this.add.text(this.scale.width / 2, this.scale.height / 2 + 85, "PRESS SPACE TO RETRY CHECKPOINT", {
-            fontSize: "24px",
-            color: "#CBD5E1"
-        }).setOrigin(0.5).setDepth(100);
+        this.add.text(
+            this.scale.width / 2,
+            this.scale.height / 2 + 85,
+            "PRESS SPACE TO RETRY CHECKPOINT",
+            {
+                fontSize: "24px",
+                color: "#CBD5E1"
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(100);
 
-        this.input.keyboard.once("keydown-SPACE", () => {
-            this.checkpointManager.restartFromCheckpoint();
-        });
+        this.input.keyboard.once(
+            "keydown-SPACE",
+            () => {
+                this.checkpointManager
+                    .restartFromCheckpoint();
+            }
+        );
     }
 }
