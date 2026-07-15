@@ -4,31 +4,26 @@ const config = {
     type: Phaser.AUTO,
     parent: "game",
 
-    // دقة اللعبة الأساسية
     width: 1280,
     height: 720,
 
     backgroundColor: "#020617",
 
     scale: {
-        // يحافظ على أبعاد اللعبة بدون تشويه
         mode: Phaser.Scale.FIT,
-
-        // يوسّط اللعبة أفقياً وعمودياً
         autoCenter: Phaser.Scale.CENTER_BOTH,
-
-        // يمنع ظهور أجزاء من الـ Canvas خارج الشاشة
         autoRound: true,
-
-        // يجعل الحاوية تستفيد من كامل مساحة الشاشة
         expandParent: true,
 
-        // العنصر المستخدم عند تفعيل Fullscreen لاحقاً
+        /*
+         * Phaser سيستخدم هذا العنصر عند طلب Fullscreen.
+         * يجب أن يكون في index.html عنصر id="game".
+         */
         fullscreenTarget: "game"
     },
 
     input: {
-        activePointers: 2,
+        activePointers: 3,
 
         mouse: {
             preventDefaultWheel: true
