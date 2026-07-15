@@ -55,6 +55,8 @@ export default class BossManager {
 
         this.currentBossKey = config.key;
 
+        this.scene.soundManager?.playMusic("boss_music", 0.28);
+
         this.showWarning(
             config.name,
             config.color,
@@ -293,6 +295,8 @@ export default class BossManager {
             "explosion",
             0.75
         );
+
+        this.scene.soundManager?.playMusic("game_music", 0.22);
 
         this.activeBoss.destroy();
         this.activeBoss = null;

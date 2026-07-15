@@ -21,6 +21,7 @@ import XPManager from "../managers/XPManager";
 import CreditsManager from "../managers/CreditsManager";
 import { getShipById } from "../config/ShipCatalog";
 import PauseMenu from "../ui/PauseMenu";
+import MobileManager from "../managers/MobileManager";
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -28,6 +29,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.mobileManager = new MobileManager(this);
         this.soundManager = new SoundManager(this);
         this.saveManager = new SaveManager(this);
         this.achievementManager = new AchievementManager(this);
@@ -38,12 +40,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.saveManager.startRun();
 
-        const menuMusic = this.sound.get("menu_music");
-
-        if (menuMusic) {
-            menuMusic.stop();
-        }
-
+        this.soundManager.stopMusicByKey("menu_music");
         this.soundManager.playMusic("game_music", 0.22);
 
         const { width, height } = this.scale;
@@ -184,7 +181,9 @@ export default class GameScene extends Phaser.Scene {
     createSpaceDust() {
         const { width, height } = this.scale;
 
-        for (let i = 0; i < 45; i++) {
+        const dustCount = Math.max(14, Math.round(45 * (this.mobileManager?.getParticleMultiplier?.() || 1)));
+
+        for (let i = 0; i < dustCount; i++) {
             const dust = this.add.circle(
                 Phaser.Math.Between(0, width),
                 Phaser.Math.Between(0, height),
@@ -206,7 +205,9 @@ export default class GameScene extends Phaser.Scene {
     createFarAsteroids() {
         const { width, height } = this.scale;
 
-        for (let i = 0; i < 10; i++) {
+        const asteroidCount = Math.max(4, Math.round(10 * (this.mobileManager?.getParticleMultiplier?.() || 1)));
+
+        for (let i = 0; i < asteroidCount; i++) {
             const rock = this.add.circle(
                 Phaser.Math.Between(0, width),
                 Phaser.Math.Between(0, height),

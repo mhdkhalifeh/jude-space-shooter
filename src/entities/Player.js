@@ -40,7 +40,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.targetX = x;
         this.targetY = y;
 
-        this.touchSensitivity = 1.15;
+        this.touchSensitivity = 1.05;
+        this.mobileLerp = 0.24;
 
         if (this.isMobile) {
             this.setupMobileControls();
@@ -146,13 +147,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.x = Phaser.Math.Linear(
             this.x,
             this.targetX,
-            0.32
+            this.mobileLerp
         );
 
         this.y = Phaser.Math.Linear(
             this.y,
             this.targetY,
-            0.32
+            this.mobileLerp
         );
     }
 

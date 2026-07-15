@@ -108,19 +108,22 @@ if (!isMobile) return;
             this.panel = null;
         }
 
+        const isMobile = this.scene.registry.get("isMobile") === true;
+        const panelScale = isMobile ? 0.82 : 1;
+
         this.panel = new UIPanel(this.scene, {
-            width: 560,
-            height: 520,
+            width: isMobile ? 480 : 560,
+            height: isMobile ? 440 : 520,
             overlayAlpha: 0.82,
             depth: 2000
         });
 
         const title = this.scene.add.text(
             0,
-            -185,
+            isMobile ? -150 : -185,
             "GAME PAUSED",
             {
-                fontSize: "46px",
+                fontSize: isMobile ? "36px" : "46px",
                 fontStyle: "bold",
                 color: "#38BDF8",
                 stroke: "#020617",
@@ -130,7 +133,7 @@ if (!isMobile) return;
 
         const subtitle = this.scene.add.text(
             0,
-            -130,
+            isMobile ? -108 : -130,
             "JUDE SPACE SHOOTER",
             {
                 fontSize: "17px",
@@ -143,11 +146,11 @@ if (!isMobile) return;
         const resumeButton = new UIButton(
             this.scene,
             0,
-            -55,
+            isMobile ? -45 : -55,
             "RESUME",
             () => this.hide(),
             {
-                width: 340,
+                width: isMobile ? 300 : 340,
                 color: 0x0f2f2a,
                 borderColor: 0x22c55e,
                 hoverBorderColor: 0x86efac
@@ -157,11 +160,11 @@ if (!isMobile) return;
         const restartButton = new UIButton(
             this.scene,
             0,
-            30,
+            isMobile ? 22 : 30,
             "RESTART CHECKPOINT",
             () => this.restartCheckpoint(),
             {
-                width: 340,
+                width: isMobile ? 300 : 340,
                 color: 0x172033,
                 borderColor: 0x38bdf8
             }
@@ -170,11 +173,11 @@ if (!isMobile) return;
         const settingsButton = new UIButton(
             this.scene,
             0,
-            115,
+            isMobile ? 89 : 115,
             "SETTINGS",
             () => this.openSettings(),
             {
-                width: 340,
+                width: isMobile ? 300 : 340,
                 color: 0x17152c,
                 borderColor: 0xa78bfa,
                 hoverBorderColor: 0xc4b5fd
@@ -184,11 +187,11 @@ if (!isMobile) return;
         const menuButton = new UIButton(
             this.scene,
             0,
-            200,
+            isMobile ? 156 : 200,
             "MAIN MENU",
             () => this.goToMainMenu(),
             {
-                width: 340,
+                width: isMobile ? 300 : 340,
                 color: 0x35151b,
                 borderColor: 0xef4444,
                 hoverBorderColor: 0xfca5a5

@@ -209,6 +209,8 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     openScene(key) {
+        // Keep one global menu track while browsing menu scenes.
+        // SoundManager prevents duplicate instances when returning here.
         this.scene.start(key);
     }
 }

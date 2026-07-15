@@ -15,9 +15,11 @@ export default class SettingsMenu {
     }
 
     create() {
+        const isMobile = this.scene.registry.get("isMobile") === true;
+
         this.panel = new UIPanel(this.scene, {
-            width: 620,
-            height: 560,
+            width: isMobile ? 500 : 620,
+            height: isMobile ? 470 : 560,
             overlayAlpha: 0.86,
             depth: 2200,
             borderColor: 0xa78bfa
@@ -25,10 +27,10 @@ export default class SettingsMenu {
 
         const title = this.scene.add.text(
             0,
-            -220,
+            isMobile ? -180 : -220,
             "SETTINGS",
             {
-                fontSize: "46px",
+                fontSize: isMobile ? "36px" : "46px",
                 fontStyle: "bold",
                 color: "#C4B5FD",
                 stroke: "#020617",
@@ -38,7 +40,7 @@ export default class SettingsMenu {
 
         const subtitle = this.scene.add.text(
             0,
-            -170,
+            isMobile ? -140 : -170,
             "AUDIO & DISPLAY",
             {
                 fontSize: "17px",
@@ -52,7 +54,7 @@ export default class SettingsMenu {
         this.panel.addContent(subtitle);
 
         this.createVolumeRow(
-            -95,
+            isMobile ? -78 : -95,
             "MUSIC VOLUME",
             this.scene.soundManager.getMusicVolume(),
             (value) => {
@@ -64,7 +66,7 @@ export default class SettingsMenu {
         );
 
         this.createVolumeRow(
-            5,
+            isMobile ? 0 : 5,
             "SFX VOLUME",
             this.scene.soundManager.getSfxVolume(),
             (value) => {
@@ -78,14 +80,14 @@ export default class SettingsMenu {
         this.muteButton = new UIButton(
             this.scene,
             0,
-            110,
+            isMobile ? 86 : 110,
             this.getMuteLabel(),
             () => {
                 this.scene.soundManager.toggleMute();
                 this.muteButton.setText(this.getMuteLabel());
             },
             {
-                width: 360,
+                width: isMobile ? 310 : 360,
                 color: 0x172033,
                 borderColor: 0xfacc15,
                 hoverBorderColor: 0xfde68a
@@ -95,7 +97,7 @@ export default class SettingsMenu {
         const fullscreenButton = new UIButton(
             this.scene,
             0,
-            195,
+            isMobile ? 154 : 195,
             this.scene.scale.isFullscreen
                 ? "EXIT FULLSCREEN"
                 : "ENTER FULLSCREEN",
@@ -109,7 +111,7 @@ export default class SettingsMenu {
                 }
             },
             {
-                width: 360,
+                width: isMobile ? 310 : 360,
                 color: 0x0f2f2a,
                 borderColor: 0x22c55e,
                 hoverBorderColor: 0x86efac
@@ -119,7 +121,7 @@ export default class SettingsMenu {
         const backButton = new UIButton(
             this.scene,
             0,
-            280,
+            isMobile ? 222 : 280,
             "BACK",
             () => {
                 this.destroy();
@@ -129,7 +131,7 @@ export default class SettingsMenu {
                 }
             },
             {
-                width: 360,
+                width: isMobile ? 310 : 360,
                 color: 0x35151b,
                 borderColor: 0xef4444,
                 hoverBorderColor: 0xfca5a5

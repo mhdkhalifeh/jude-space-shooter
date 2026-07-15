@@ -1,8 +1,8 @@
 import Phaser from "phaser";
+
 export default class SoundManager {
     constructor(scene) {
         this.scene = scene;
-
         this.storageKey = "jude_space_shooter_audio";
 
         const saved = this.loadSettings();
@@ -10,10 +10,9 @@ export default class SoundManager {
         this.musicVolume = saved.musicVolume ?? 0.25;
         this.sfxVolume = saved.sfxVolume ?? 0.5;
         this.muted = saved.muted ?? false;
-
-        this.currentMusic = null;
         this.enabled = true;
 
+        this.currentMusic = this.getGlobalMusic();
         this.applyMuteState();
     }
 
@@ -42,45 +41,112 @@ export default class SoundManager {
         }
     }
 
+    getGlobalMusic() {
+        const soundManager = this.scene.sound;
+        return soundManager.__judeActiveMusic || null;
+    }
+
+    setGlobalMusic(sound) {
+        this.scene.sound.__judeActiveMusic = sound || null;
+        this.currentMusic = sound || null;
+    }
+
+    getMusicSounds() {
+        const sounds = this.scene.sound.sounds || [];
+        return sounds.filter((sound) => sound?.__judeMusic === true);
+    }
+
+    stopDuplicateMusic(except = null) {
+        this.getMusicSounds().forEach((sound) => {
+            if (sound === except) return;
+
+            try {
+                sound.stop();
+                sound.destroy();
+            } catch (error) {
+                console.warn("Could not stop duplicate music:", error);
+            }
+        });
+    }
+
     playMusic(key, volume = null) {
-        if (!this.enabled) return;
-        if (!this.scene.cache.audio.exists(key)) return;
+        if (!this.enabled) return null;
+        if (!this.scene.cache.audio.exists(key)) return null;
 
         const targetVolume =
             volume !== null
                 ? Phaser.Math.Clamp(volume, 0, 1)
                 : this.musicVolume;
 
+        let activeMusic = this.getGlobalMusic();
+
         if (
-            this.currentMusic?.key === key &&
-            this.currentMusic.isPlaying
+            activeMusic?.key === key &&
+            activeMusic.isPlaying
         ) {
-            this.currentMusic.setVolume(
-                this.muted ? 0 : targetVolume
-            );
-            return;
+            activeMusic.__judeTargetVolume = targetVolume;
+            activeMusic.setVolume(this.muted ? 0 : targetVolume);
+            this.stopDuplicateMusic(activeMusic);
+            this.setGlobalMusic(activeMusic);
+            return activeMusic;
         }
 
-        if (this.currentMusic) {
-            this.currentMusic.stop();
-            this.currentMusic.destroy();
-            this.currentMusic = null;
-        }
+        this.stopMusic();
 
-        this.currentMusic = this.scene.sound.add(key, {
+        const music = this.scene.sound.add(key, {
             loop: true,
             volume: this.muted ? 0 : targetVolume
         });
 
-        this.currentMusic.play();
+        music.__judeMusic = true;
+        music.__judeTargetVolume = targetVolume;
+
+        music.once("destroy", () => {
+            if (this.getGlobalMusic() === music) {
+                this.setGlobalMusic(null);
+            }
+        });
+
+        music.play();
+        this.setGlobalMusic(music);
+        this.stopDuplicateMusic(music);
+
+        return music;
     }
 
     stopMusic() {
-        if (!this.currentMusic) return;
+        const activeMusic = this.getGlobalMusic();
 
-        this.currentMusic.stop();
-        this.currentMusic.destroy();
-        this.currentMusic = null;
+        if (activeMusic) {
+            try {
+                activeMusic.stop();
+                activeMusic.destroy();
+            } catch (error) {
+                console.warn("Could not stop active music:", error);
+            }
+        }
+
+        this.stopDuplicateMusic();
+        this.setGlobalMusic(null);
+    }
+
+    stopMusicByKey(key) {
+        if (!key) return;
+
+        this.getMusicSounds().forEach((sound) => {
+            if (sound.key !== key) return;
+
+            try {
+                sound.stop();
+                sound.destroy();
+            } catch (error) {
+                console.warn(`Could not stop music ${key}:`, error);
+            }
+        });
+
+        if (this.getGlobalMusic()?.key === key) {
+            this.setGlobalMusic(null);
+        }
     }
 
     sfx(key, volume = null) {
@@ -100,10 +166,11 @@ export default class SoundManager {
     setMusicVolume(value) {
         this.musicVolume = Phaser.Math.Clamp(value, 0, 1);
 
-        if (this.currentMusic) {
-            this.currentMusic.setVolume(
-                this.muted ? 0 : this.musicVolume
-            );
+        const activeMusic = this.getGlobalMusic();
+
+        if (activeMusic) {
+            activeMusic.__judeTargetVolume = this.musicVolume;
+            activeMusic.setVolume(this.muted ? 0 : this.musicVolume);
         }
 
         this.saveSettings();
@@ -128,10 +195,13 @@ export default class SoundManager {
     applyMuteState() {
         this.scene.sound.mute = this.muted;
 
-        if (this.currentMusic) {
-            this.currentMusic.setVolume(
-                this.muted ? 0 : this.musicVolume
-            );
+        const activeMusic = this.getGlobalMusic();
+
+        if (activeMusic) {
+            const volume =
+                activeMusic.__judeTargetVolume ?? this.musicVolume;
+
+            activeMusic.setVolume(this.muted ? 0 : volume);
         }
     }
 
