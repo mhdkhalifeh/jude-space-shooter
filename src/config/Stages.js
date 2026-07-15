@@ -65,7 +65,77 @@ export const Stages = {
         4: { asteroids: false, storm: false },
         5: { asteroids: false, storm: false }
     }
+    },
+
+    4: {
+        id: 4,
+        name: "ION STORM FRONTIER",
+        background: "background_stage3",
+        boss: "alpha",
+        titleColor: "#22D3EE",
+        spawnDelay: 1050,
+        waves: {
+            1: ["sniper","fighter","kamikaze","scout","sniper","fighter","kamikaze","shield_carrier"],
+            2: ["kamikaze","interceptor","sniper","medic","fighter","shield_carrier","kamikaze","bomber"],
+            3: ["shield_carrier","sniper","heavy_cruiser","fighter","medic","kamikaze","interceptor"],
+            4: ["heavy_cruiser","sniper","kamikaze","shield_carrier","medic","interceptor","sniper","kamikaze"],
+            5: ["heavy_cruiser","shield_carrier","medic","sniper","kamikaze","elite","heavy_cruiser"]
+        },
+        rulesByWave: {
+            1: { asteroids: false, storm: true },
+            2: { asteroids: true, storm: true },
+            3: { asteroids: true, storm: true },
+            4: { asteroids: true, storm: true },
+            5: { asteroids: true, storm: true }
+        }
     }
+,
+    5: {
+        id: 5,
+        name: "QUANTUM RIFT",
+        background: "background_quantum_rift",
+        boss: "omega",
+        titleColor: "#A78BFA",
+        spawnDelay: 940,
+        waves: {
+            1: ["sniper","kamikaze","interceptor","shield_carrier","fighter","sniper","medic","kamikaze"],
+            2: ["heavy_cruiser","sniper","shield_carrier","medic","interceptor","kamikaze","fighter"],
+            3: ["kamikaze","kamikaze","sniper","heavy_cruiser","shield_carrier","elite"],
+            4: ["medic","heavy_cruiser","sniper","interceptor","shield_carrier","kamikaze","elite"],
+            5: ["heavy_cruiser","elite","sniper","shield_carrier","medic","heavy_cruiser","kamikaze"]
+        },
+        rulesByWave: {
+            1: { asteroids: false, storm: true },
+            2: { asteroids: false, storm: true },
+            3: { asteroids: true, storm: true },
+            4: { asteroids: true, storm: true },
+            5: { asteroids: true, storm: true }
+        }
+    },
+
+    6: {
+        id: 6,
+        name: "FROZEN VOID",
+        background: "background_frozen_void",
+        boss: "leviathan",
+        titleColor: "#7DD3FC",
+        spawnDelay: 880,
+        waves: {
+            1: ["shield_carrier","sniper","fighter","heavy_cruiser","medic","interceptor"],
+            2: ["kamikaze","sniper","shield_carrier","heavy_cruiser","elite","medic"],
+            3: ["heavy_cruiser","heavy_cruiser","sniper","kamikaze","shield_carrier","elite"],
+            4: ["medic","elite","shield_carrier","sniper","heavy_cruiser","kamikaze","interceptor"],
+            5: ["elite","heavy_cruiser","shield_carrier","sniper","medic","elite","heavy_cruiser"]
+        },
+        rulesByWave: {
+            1: { asteroids: false, storm: false },
+            2: { asteroids: true, storm: false },
+            3: { asteroids: true, storm: true },
+            4: { asteroids: true, storm: true },
+            5: { asteroids: true, storm: true }
+        }
+    }
+
 };
 
 export function getStageConfig(stageId) {

@@ -1,17 +1,30 @@
 import Phaser from "phaser";
+import { getShipById } from "../config/ShipCatalog";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
-        super(scene, x, y, "player");
+        const selectedShipId =
+            scene.saveManager?.getSelectedShip?.() ||
+            scene.registry.get("selectedShip") ||
+            "vanguard";
+
+        const shipConfig = getShipById(selectedShipId);
+
+        super(scene, x, y, shipConfig.texture || "player");
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        this.shipConfig = shipConfig;
+
         this.setScale(0.12);
+        if (this.shipConfig.tint && this.shipConfig.tint !== 0xffffff) {
+            this.setTint(this.shipConfig.tint);
+        }
         this.setDepth(10);
         this.body.setCollideWorldBounds(true);
 
-        this.moveSpeed = 0.14;
+        this.moveSpeed = 0.14 * (this.shipConfig.stats?.speed || 1);
         this.maxTilt = 10;
         this.isHit = false;
 

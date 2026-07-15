@@ -334,7 +334,9 @@ getGeneratedBackground() {
     const backgrounds = [
         "background_space",
         "background_stage2",
-        "background_stage3"
+        "background_stage3",
+        "background_quantum_rift",
+        "background_frozen_void"
     ];
 
     return backgrounds[(this.stage - 1) % backgrounds.length];

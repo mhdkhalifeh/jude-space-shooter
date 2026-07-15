@@ -303,6 +303,20 @@ export default class BossManager {
         this.scene.saveManager
             ?.addBossKill(bossKey);
 
+        this.scene.xpManager
+            ?.addBossXP(bossKey);
+
+        const creditRewards = {
+            alpha: 2500,
+            omega: 5000,
+            leviathan: 8500
+        };
+
+        this.scene.creditsManager?.add(
+            creditRewards[bossKey] || 2500,
+            "BOSS DEFEATED"
+        );
+
         this.scene
             .achievementManager
             ?.check();
@@ -530,6 +544,14 @@ export default class BossManager {
                 this.scene.waveManager
                     ?.wave || 1
             );
+
+        this.scene.xpManager
+            ?.addStageClearXP(stage);
+
+        this.scene.creditsManager?.add(
+            1000 + stage * 500,
+            `STAGE ${stage} CLEARED`
+        );
 
         this.scene
             .achievementManager

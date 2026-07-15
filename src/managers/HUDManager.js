@@ -6,6 +6,7 @@ export default class HUDManager {
 
         this.scoreContainer = null;
         this.scoreText = null;
+        this.creditsText = null;
 
         this.hpContainer = null;
         this.hearts = [];
@@ -33,6 +34,7 @@ export default class HUDManager {
 
     create() {
         this.createScore();
+        this.createCredits();
         this.createHealth();
         this.createMissionStatus();
         this.createWeaponStatus();
@@ -69,6 +71,7 @@ export default class HUDManager {
             7,
             "SCORE",
             {
+                fontFamily: '"Orbitron", "Oxanium", sans-serif',
                 fontSize: this.isMobile ? "10px" : "11px",
                 color: "#7DD3FC",
                 fontStyle: "bold",
@@ -81,6 +84,7 @@ export default class HUDManager {
             22,
             "000000",
             {
+                fontFamily: '"Orbitron", "Oxanium", sans-serif',
                 fontSize: this.isMobile ? "21px" : "24px",
                 color: "#FFFFFF",
                 fontStyle: "bold",
@@ -94,6 +98,27 @@ export default class HUDManager {
             label,
             this.scoreText
         ]);
+    }
+
+    createCredits() {
+        const x = 24;
+        const y = 78;
+
+        this.creditsText = this.scene.add.text(
+            x,
+            y,
+            "◈ 0",
+            {
+                fontFamily: '"Orbitron", "Oxanium", sans-serif',
+                fontSize: this.isMobile ? "13px" : "15px",
+                fontStyle: "600",
+                color: "#FACC15",
+                stroke: "#020617",
+                strokeThickness: 4
+            }
+        )
+            .setDepth(1000)
+            .setScrollFactor(0);
     }
 
     createHealth() {
@@ -370,6 +395,12 @@ export default class HUDManager {
             duration: 70,
             yoyo: true
         });
+    }
+
+    updateCredits(credits) {
+        this.creditsText?.setText(
+            `◈ ${Number(credits || 0).toLocaleString("en-US")}`
+        );
     }
 
     updateHP(hp) {

@@ -24,11 +24,22 @@ export default class CollisionManager {
         if (!bullet?.active || !enemy?.active) return;
         if (enemy.canBeHit === false) return;
 
-        bullet.destroy();
+        if (bullet.hitTargets?.has(enemy)) return;
+        bullet.hitTargets?.add(enemy);
 
-        const damage =
-            this.scene.upgradeManager
-                ?.getBulletDamage?.() ?? 1;
+        const damage = Math.max(
+            1,
+            Math.round(
+                bullet.damage ??
+                (this.scene.upgradeManager?.getBulletDamage?.() ?? 1)
+            )
+        );
+
+        if ((bullet.piercing || 0) > 0) {
+            bullet.piercing -= 1;
+        } else {
+            bullet.destroy();
+        }
 
         this.scene.effects.hitFreeze(45);
 
@@ -58,6 +69,11 @@ export default class CollisionManager {
         const enemyScore =
             enemy.stats?.score || 10;
 
+        const enemyType =
+            enemy.type ||
+            enemy.stats?.type ||
+            "scout";
+
         enemy.destroy();
 
         this.scene.waveManager.enemyKilled();
@@ -67,6 +83,20 @@ export default class CollisionManager {
             ?.addEnemyKill({
                 elite: isElite
             });
+
+        this.scene.xpManager?.addEnemyXP(
+            enemyType,
+            isElite
+        );
+
+        const creditsReward = isElite
+            ? 150
+            : Math.max(10, enemyScore * 2);
+
+        this.scene.creditsManager?.add(
+            creditsReward,
+            "ENEMY DESTROYED"
+        );
 
         this.scene.effects.showDamage(
             explosionX,
@@ -155,10 +185,6 @@ export default class CollisionManager {
         if (this.scene.isGameOver) return;
         if (!this.scene.mines) return;
 
-        const damage =
-            this.scene.upgradeManager
-                ?.getBulletDamage?.() ?? 1;
-
         this.scene.bullets
             .getChildren()
             .forEach((bullet) => {
@@ -182,12 +208,12 @@ export default class CollisionManager {
                                 );
 
                         if (distance < 36) {
+                            const damage = Math.max(1, Math.round(
+                                bullet.damage ?? (this.scene.upgradeManager?.getBulletDamage?.() ?? 1)
+                            ));
                             bullet.destroy();
 
-                            const isDead =
-                                mine.takeDamage(
-                                    damage
-                                );
+                            const isDead = mine.takeDamage(damage);
 
                             if (!isDead) {
                                 this.scene
@@ -389,10 +415,6 @@ export default class CollisionManager {
         if (this.scene.isGameOver) return;
         if (!this.scene.asteroids) return;
 
-        const damage =
-            this.scene.upgradeManager
-                ?.getBulletDamage?.() ?? 1;
-
         this.scene.bullets
             .getChildren()
             .forEach((bullet) => {
@@ -420,27 +442,16 @@ export default class CollisionManager {
                                 .damageRadius ||
                             48;
 
-                        if (
-                            distance <
-                            hitRadius
-                        ) {
+                        if (distance < hitRadius) {
+                            const damage = Math.max(1, Math.round(
+                                bullet.damage ?? (this.scene.upgradeManager?.getBulletDamage?.() ?? 1)
+                            ));
                             bullet.destroy();
 
-                            this.scene.effects
-                                .hitFreeze(18);
+                            this.scene.effects.hitFreeze(18);
+                            this.scene.effects.showDamage(asteroid.x, asteroid.y, damage);
 
-                            this.scene.effects
-                                .showDamage(
-                                    asteroid.x,
-                                    asteroid.y,
-                                    damage
-                                );
-
-                            const isDead =
-                                asteroid
-                                    .takeDamage(
-                                        damage
-                                    );
+                            const isDead = asteroid.takeDamage(damage);
 
                             if (!isDead) {
                                 this.scene
@@ -711,6 +722,7 @@ export default class CollisionManager {
                         enemy.y;
 
                     enemy.destroy();
+                    this.scene.waveManager?.enemyKilled?.();
 
                     this.scene.soundManager
                         ?.sfx(

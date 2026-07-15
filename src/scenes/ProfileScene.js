@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import SaveManager from "../managers/SaveManager";
 import AchievementManager from "../managers/AchievementManager";
+import XPManager from "../managers/XPManager";
 
 export default class ProfileScene extends Phaser.Scene {
     constructor() {
@@ -12,6 +13,7 @@ export default class ProfileScene extends Phaser.Scene {
 
         this.saveManager = new SaveManager(this);
         this.achievementManager = new AchievementManager(this);
+        this.xpManager = new XPManager(this);
 
         this.cameras.main.setBackgroundColor("#020617");
 
@@ -75,7 +77,7 @@ export default class ProfileScene extends Phaser.Scene {
         const panelX = width / 2;
         const panelY = 165;
         const panelWidth = Math.min(1040, width - 80);
-        const panelHeight = 120;
+        const panelHeight = 165;
 
         this.createPanel(
             panelX,
@@ -85,7 +87,14 @@ export default class ProfileScene extends Phaser.Scene {
             0x38bdf8
         );
 
+        const xp = this.xpManager.getProfileData();
+
         const items = [
+            {
+                label: "PLAYER LEVEL",
+                value: `LEVEL ${xp.level}`,
+                color: "#FACC15"
+            },
             {
                 label: "HIGH SCORE",
                 value: Number(stats.highScore || 0).toLocaleString("en-US"),
@@ -104,7 +113,7 @@ export default class ProfileScene extends Phaser.Scene {
             {
                 label: "PLAY TIME",
                 value: this.saveManager.getPlayTimeFormatted(),
-                color: "#FACC15"
+                color: "#FCA5A5"
             }
         ];
 
@@ -146,6 +155,44 @@ export default class ProfileScene extends Phaser.Scene {
                 .setOrigin(0.5)
                 .setDepth(22);
         });
+
+        const xpBarWidth = Math.min(760, panelWidth - 120);
+        const xpBarY = panelY + 76;
+
+        this.add.rectangle(
+            panelX,
+            xpBarY,
+            xpBarWidth,
+            10,
+            0x0f172a,
+            1
+        )
+            .setStrokeStyle(1, 0x334155, 1)
+            .setDepth(22);
+
+        this.add.rectangle(
+            panelX - xpBarWidth / 2,
+            xpBarY,
+            xpBarWidth * xp.progress,
+            10,
+            0xfacc15,
+            1
+        )
+            .setOrigin(0, 0.5)
+            .setDepth(23);
+
+        this.add.text(
+            panelX,
+            xpBarY + 18,
+            `${xp.currentXP} / ${xp.requiredXP} XP`,
+            {
+                fontSize: "12px",
+                fontStyle: "bold",
+                color: "#FDE68A"
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(23);
     }
 
     createStatistics(width) {

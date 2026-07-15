@@ -17,6 +17,9 @@ import MineManager from "../managers/MineManager";
 import SoundManager from "../managers/SoundManager";
 import SaveManager from "../managers/SaveManager";
 import AchievementManager from "../managers/AchievementManager";
+import XPManager from "../managers/XPManager";
+import CreditsManager from "../managers/CreditsManager";
+import { getShipById } from "../config/ShipCatalog";
 import PauseMenu from "../ui/PauseMenu";
 
 export default class GameScene extends Phaser.Scene {
@@ -28,6 +31,10 @@ export default class GameScene extends Phaser.Scene {
         this.soundManager = new SoundManager(this);
         this.saveManager = new SaveManager(this);
         this.achievementManager = new AchievementManager(this);
+        this.xpManager = new XPManager(this);
+        this.creditsManager = new CreditsManager(this, this.saveManager);
+        this.selectedShip = getShipById(this.saveManager.getSelectedShip());
+        this.registry.set("selectedShip", this.selectedShip.id);
 
         this.saveManager.startRun();
 
@@ -55,7 +62,8 @@ export default class GameScene extends Phaser.Scene {
         this.score =
             this.checkpointManager.getStartScore();
 
-        this.playerHP = 3;
+        this.maxPlayerHP = 3 + (this.upgradeManager?.getExtraHearts?.() || 0);
+        this.playerHP = this.maxPlayerHP;
         this.playerInvincible = false;
 
         this.bg = this.add.tileSprite(
@@ -102,6 +110,7 @@ export default class GameScene extends Phaser.Scene {
         this.hud.create();
         this.hud.updateScore(this.score);
         this.hud.updateHP(this.playerHP);
+        this.hud.updateCredits?.(this.saveManager.getCredits());
 
         this.enemyManager = new EnemyManager(this);
         this.powerUpManager = new PowerUpManager(this);

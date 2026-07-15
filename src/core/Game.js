@@ -7,6 +7,7 @@ import SplashScene from "../scenes/SplashScene";
 import MenuScene from "../scenes/MenuScene";
 import InfoScene from "../scenes/InfoScene";
 import ProfileScene from "../scenes/ProfileScene";
+import HangarScene from "../scenes/HangarScene";
 import GameScene from "../scenes/GameScene";
 import GameOverScene from "../scenes/GameOverScene";
 
@@ -19,6 +20,7 @@ const game = new Phaser.Game({
         MenuScene,
         InfoScene,
         ProfileScene,
+        HangarScene,
         GameScene,
         GameOverScene
     ]

@@ -164,6 +164,10 @@ export default class AchievementManager {
 
             if (didUnlock) {
                 this.queue.push(achievement);
+
+                this.scene.xpManager?.addAchievementXP(
+                    achievement.title
+                );
             }
         });
 

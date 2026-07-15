@@ -23,6 +23,9 @@ export default class SaveManager {
             doubleLasersCollected: 0,
             shotsFired: 0,
             damageTaken: 0,
+            credits: 2500,
+            ownedShips: ["vanguard"],
+            selectedShip: "vanguard",
             achievements: {},
             lastRun: {
                 score: 0,
@@ -250,6 +253,53 @@ export default class SaveManager {
                 id,
                 ...achievement
             }));
+    }
+
+    getCredits() {
+        return Math.max(0, Number(this.data.credits) || 0);
+    }
+
+    addCredits(amount) {
+        const value = Math.max(0, Math.floor(Number(amount) || 0));
+        this.data.credits = this.getCredits() + value;
+        this.save();
+        return this.data.credits;
+    }
+
+    spendCredits(amount) {
+        const value = Math.max(0, Math.floor(Number(amount) || 0));
+        if (this.getCredits() < value) return false;
+        this.data.credits = this.getCredits() - value;
+        this.save();
+        return true;
+    }
+
+    getOwnedShips() {
+        return Array.isArray(this.data.ownedShips)
+            ? [...this.data.ownedShips]
+            : ["vanguard"];
+    }
+
+    ownsShip(shipId) {
+        return this.getOwnedShips().includes(shipId);
+    }
+
+    unlockShip(shipId) {
+        if (!shipId || this.ownsShip(shipId)) return false;
+        this.data.ownedShips.push(shipId);
+        this.save();
+        return true;
+    }
+
+    getSelectedShip() {
+        return this.data.selectedShip || "vanguard";
+    }
+
+    selectShip(shipId) {
+        if (!this.ownsShip(shipId)) return false;
+        this.data.selectedShip = shipId;
+        this.save();
+        return true;
     }
 
     getHighScore() {
