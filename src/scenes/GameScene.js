@@ -94,6 +94,14 @@ export default class GameScene extends Phaser.Scene {
                 height - 180
             );
 
+        /*
+         * Player هو مصدر بيانات المركبة الأساسي.
+         * نحافظ على selectedShip للتوافق مع الأنظمة القديمة.
+         */
+        this.selectedShip =
+            this.player.shipConfig ||
+            this.selectedShip;
+
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.enemyBullets = this.physics.add.group();
@@ -136,6 +144,8 @@ export default class GameScene extends Phaser.Scene {
 
         this.events.once("shutdown", () => {
             this.pauseMenu?.destroy();
+            this.player?.destroyMobileControls?.();
+            this.shootingManager?.destroy?.();
         });
 
         this.waveManager.start();
@@ -409,6 +419,8 @@ export default class GameScene extends Phaser.Scene {
         this.saveManager?.addDamageTaken();
         this.hud.updateHP(this.playerHP);
 
+        this.vibrate(28);
+
         this.playerInvincible = true;
 
         this.cameras.main.shake(
@@ -441,6 +453,26 @@ export default class GameScene extends Phaser.Scene {
 
         if (this.playerHP <= 0) {
             this.triggerGameOver();
+        }
+    }
+
+    vibrate(duration = 20) {
+        if (
+            !this.mobileManager?.isMobile &&
+            !this.sys.game.device.input.touch
+        ) {
+            return;
+        }
+
+        if (
+            typeof navigator !== "undefined" &&
+            typeof navigator.vibrate === "function"
+        ) {
+            try {
+                navigator.vibrate(duration);
+            } catch (error) {
+                // بعض المتصفحات تمنع الاهتزاز؛ نتجاهل الخطأ.
+            }
         }
     }
 
