@@ -2,140 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#020617" />
   <title>JUDE Space Shooter</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
+    :root { color-scheme: dark; background: #020617; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-background: radial-gradient(circle at 50% 20%, #0b1730 0%, #020617 55%, #01030a 100%);
-      overscroll-behavior: none;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
+      position: fixed; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0;
+      overflow: hidden; background: #020617; overscroll-behavior: none; touch-action: none;
+      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
     }
-
+    body { min-height: 100vh; min-height: 100dvh; }
     #game {
-      width: 100vw;
-      height: 100vh;
+      position: fixed; inset: 0; width: 100vw; width: 100dvw; height: 100vh; height: 100dvh;
       overflow: hidden;
-      position: fixed;
-      inset: 0;
-background: #020617;
+      background: radial-gradient(circle at 50% 20%, #0b1730 0%, #020617 58%, #01030a 100%);
     }
-
+    #game:fullscreen, #game:-webkit-full-screen {
+      width: 100vw !important; height: 100vh !important; height: 100dvh !important; background: #020617;
+    }
     canvas {
-    display:block;
-
-    width:100% !important;
-    height:100% !important;
-
-    touch-action:none;
-}
-  
-
+      position: absolute; inset: 0; display: block; width: 100% !important; height: 100% !important;
+      margin: 0 !important; padding: 0 !important; touch-action: none;
+      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    }
     #rotate-device {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 18px;
-      padding: 30px;
-      box-sizing: border-box;
-      text-align: center;
-      color: #e2e8f0;
-      background: radial-gradient(circle at center, #0b1730 0%, #020617 70%);
+      display: none; position: fixed; inset: 0; z-index: 99999; align-items: center; justify-content: center;
+      flex-direction: column; gap: 18px;
+      padding: max(30px, env(safe-area-inset-top)) max(30px, env(safe-area-inset-right)) max(30px, env(safe-area-inset-bottom)) max(30px, env(safe-area-inset-left));
+      text-align: center; color: #e2e8f0;
+      background: radial-gradient(circle at center, #0b1730 0%, #020617 72%);
       font-family: "Oxanium", sans-serif;
     }
-
     #rotate-device .phone {
-      width: 54px;
-      height: 92px;
-      border: 4px solid #38bdf8;
-      border-radius: 10px;
-      box-shadow: 0 0 24px rgba(56, 189, 248, 0.45);
-      animation: rotatePhone 1.8s ease-in-out infinite;
+      width: 54px; height: 92px; border: 4px solid #38bdf8; border-radius: 10px;
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.45); animation: rotatePhone 1.8s ease-in-out infinite;
     }
-
     #rotate-device strong { color: #7dd3fc; font-size: 24px; }
     #rotate-device span { color: #94a3b8; font-size: 15px; }
-
     @keyframes rotatePhone {
       0%, 20% { transform: rotate(0deg); }
       70%, 100% { transform: rotate(90deg); }
     }
-
     @media (orientation: portrait) and (max-width: 900px) {
       #rotate-device { display: flex; }
       #game { visibility: hidden; }
     }
-
-    html,
-body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #020617;
-    overscroll-behavior: none;
-    touch-action: none;
-}
-
-#game {
-    position: fixed;
-    inset: 0;
-
-    width: 100vw;
-    width: 100dvw;
-
-    height: 100vh;
-    height: 100dvh;
-
-    overflow: hidden;
-    background: #020617;
-}
-
-#game:fullscreen,
-#game:-webkit-full-screen {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    background: #020617;
-}
-
-canvas {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-    touch-action: none;
-}
-
-body {
-    position: fixed;
-    inset: 0;
-}
+    @media (orientation: landscape) {
+      #rotate-device { display: none !important; }
+      #game { visibility: visible !important; }
+    }
   </style>
 </head>
 <body>
   <div id="game"></div>
-  <div id="rotate-device"><div class="phone"></div><strong>ROTATE YOUR DEVICE</strong><span>JUDE Space Shooter is designed for landscape mode.</span></div>
+  <div id="rotate-device">
+    <div class="phone"></div>
+    <strong>ROTATE YOUR DEVICE</strong>
+    <span>JUDE Space Shooter is designed for landscape mode.</span>
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -1,5 +1,10 @@
 import Phaser from "phaser";
 
+const isMobile =
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.innerWidth <= 900;
+
 const config = {
     type: Phaser.AUTO,
     parent: "game",
@@ -10,15 +15,13 @@ const config = {
     backgroundColor: "#020617",
 
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: isMobile
+            ? Phaser.Scale.ENVELOP
+            : Phaser.Scale.FIT,
+
         autoCenter: Phaser.Scale.CENTER_BOTH,
         autoRound: true,
         expandParent: false,
-
-        /*
-         * Phaser سيستخدم هذا العنصر عند طلب Fullscreen.
-         * يجب أن يكون في index.html عنصر id="game".
-         */
         fullscreenTarget: "game"
     },
 
@@ -60,7 +63,21 @@ const config = {
         disableWebAudio: false
     },
 
-    banner: false
+    banner: false,
+
+    callbacks: {
+        postBoot: (game) => {
+            const resize = () => {
+                game.scale.refresh();
+            };
+
+            window.addEventListener("resize", resize);
+
+            window.addEventListener("orientationchange", () => {
+                window.setTimeout(resize, 180);
+            });
+        }
+    }
 };
 
 export default config;
