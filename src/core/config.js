@@ -13,7 +13,7 @@ const config = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         autoRound: true,
-        expandParent: true,
+        expandParent: false,
 
         /*
          * Phaser سيستخدم هذا العنصر عند طلب Fullscreen.
