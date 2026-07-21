@@ -1,97 +1,277 @@
+export const SHIP_RARITIES = {
+    COMMON: {
+        id: "common",
+        label: "COMMON",
+        color: 0x94a3b8,
+        hex: "#94A3B8"
+    },
+
+    RARE: {
+        id: "rare",
+        label: "RARE",
+        color: 0x38bdf8,
+        hex: "#38BDF8"
+    },
+
+    EPIC: {
+        id: "epic",
+        label: "EPIC",
+        color: 0xa78bfa,
+        hex: "#A78BFA"
+    },
+
+    LEGENDARY: {
+        id: "legendary",
+        label: "LEGENDARY",
+        color: 0xfacc15,
+        hex: "#FACC15"
+    },
+
+    MYTHIC: {
+        id: "mythic",
+        label: "MYTHIC",
+        color: 0xf97316,
+        hex: "#F97316"
+    },
+
+    ULTIMATE: {
+        id: "ultimate",
+        label: "ULTIMATE",
+        color: 0xef4444,
+        hex: "#EF4444"
+    }
+};
+
 export const SHIP_CATALOG = [
     {
         id: "vanguard",
         name: "JUDE VANGUARD",
-        className: "BALANCED INTERCEPTOR",
-        rarity: "COMMON",
+        className: "BALANCED STRIKE FIGHTER",
+        rarity: SHIP_RARITIES.COMMON.label,
+
+        texture: "player",
+        tint: 0x38bdf8,
+
         price: 0,
         unlockLevel: 1,
-        texture: "player",
-        tint: 0xffffff,
-        description: "Reliable, responsive and battle-tested. The standard JUDE fleet interceptor.",
-        ability: "Balanced Frame",
-        stats: { damage: 1.0, fireRate: 1.0, speed: 1.0, shield: 1.0 }
+
+        description:
+            "The standard JUDE fleet fighter. Reliable, responsive, and balanced for every combat sector.",
+
+        ability:
+            "TACTICAL BALANCE",
+
+        stats: {
+            damage: 1.0,
+            fireRate: 1.0,
+            speed: 1.0,
+            shield: 1.0
+        }
     },
+
     {
         id: "phantom",
         name: "PHANTOM-X",
-        className: "STEALTH STRIKER",
-        rarity: "RARE",
-        price: 12000,
-        unlockLevel: 3,
+        className: "STEALTH INTERCEPTOR",
+        rarity: SHIP_RARITIES.RARE.label,
+
         texture: "ship_phantom",
-        tint: 0xffffff,
-        description: "A needle-fast stealth frame tuned for evasive pilots and sustained fire.",
-        ability: "Phase Thrusters",
-        stats: { damage: 0.9, fireRate: 1.2, speed: 1.28, shield: 0.82 }
+        tint: 0x22d3ee,
+
+        price: 12000,
+        unlockLevel: 4,
+
+        description:
+            "A lightweight stealth interceptor built for aggressive movement and rapid target acquisition.",
+
+        ability:
+            "PHASE ACCELERATION",
+
+        stats: {
+            damage: 1.12,
+            fireRate: 1.18,
+            speed: 1.42,
+            shield: 0.82
+        }
     },
+
     {
         id: "eclipse",
         name: "ECLIPSE MK-II",
-        className: "PLASMA ASSAULT",
-        rarity: "EPIC",
-        price: 35000,
-        unlockLevel: 8,
+        className: "HEAVY ASSAULT FIGHTER",
+        rarity: SHIP_RARITIES.EPIC.label,
+
         texture: "ship_eclipse",
-        tint: 0xffffff,
-        description: "A high-output assault craft with amplified plasma systems and reinforced plating.",
-        ability: "Plasma Surge",
-        stats: { damage: 1.3, fireRate: 1.06, speed: 0.96, shield: 1.18 }
+        tint: 0xef4444,
+
+        price: 28000,
+        unlockLevel: 8,
+
+        description:
+            "A heavily armed assault craft designed to overwhelm enemy formations with sustained plasma fire.",
+
+        ability:
+            "CRIMSON OVERDRIVE",
+
+        stats: {
+            damage: 1.42,
+            fireRate: 1.12,
+            speed: 0.92,
+            shield: 1.2
+        }
     },
+
     {
         id: "spectre",
         name: "SPECTRE-7",
-        className: "VOID RECON",
-        rarity: "EPIC",
-        price: 52000,
-        unlockLevel: 11,
+        className: "QUANTUM INTERCEPTOR",
+        rarity: SHIP_RARITIES.EPIC.label,
+
         texture: "ship_spectre",
-        tint: 0xffffff,
-        description: "A compact recon fighter with precise handling and exceptional burst mobility.",
-        ability: "Ghost Vector",
-        stats: { damage: 1.12, fireRate: 1.16, speed: 1.36, shield: 0.9 }
+        tint: 0x60a5fa,
+
+        price: 42000,
+        unlockLevel: 12,
+
+        description:
+            "An ultra-fast interceptor using experimental quantum thrusters to evade dense projectile patterns.",
+
+        ability:
+            "QUANTUM DASH",
+
+        stats: {
+            damage: 1.18,
+            fireRate: 1.38,
+            speed: 1.58,
+            shield: 0.88
+        }
     },
+
     {
         id: "guardian",
         name: "GUARDIAN AEGIS",
-        className: "DEFENSE CORVETTE",
-        rarity: "EPIC",
-        price: 68000,
-        unlockLevel: 13,
+        className: "DEFENSIVE CRUISER",
+        rarity: SHIP_RARITIES.LEGENDARY.label,
+
         texture: "ship_guardian",
-        tint: 0xffffff,
-        description: "A reinforced defense craft built to survive dense projectile fields and long sorties.",
-        ability: "Aegis Matrix",
-        stats: { damage: 1.08, fireRate: 0.98, speed: 0.9, shield: 1.48 }
+        tint: 0x22c55e,
+
+        price: 65000,
+        unlockLevel: 16,
+
+        description:
+            "A royal defensive cruiser reinforced with an advanced Aegis energy field and heavy armor plating.",
+
+        ability:
+            "AEGIS SHIELD MATRIX",
+
+        stats: {
+            damage: 1.24,
+            fireRate: 0.98,
+            speed: 0.86,
+            shield: 1.65
+        }
     },
+
     {
         id: "nova",
         name: "NOVA REAPER",
-        className: "HIGH-RISK ASSAULT",
-        rarity: "LEGENDARY",
-        price: 84000,
-        unlockLevel: 16,
+        className: "HEAVY DESTROYER",
+        rarity: SHIP_RARITIES.MYTHIC.label,
+
         texture: "ship_nova",
-        tint: 0xffffff,
-        description: "An unstable attack platform that trades protection for devastating weapon output.",
-        ability: "Nova Overload",
-        stats: { damage: 1.62, fireRate: 1.12, speed: 1.04, shield: 0.72 }
+        tint: 0xf97316,
+
+        price: 95000,
+        unlockLevel: 22,
+
+        description:
+            "A brutal destroyer powered by a volatile nova reactor. Built to eliminate bosses and armored targets.",
+
+        ability:
+            "NOVA BARRAGE",
+
+        stats: {
+            damage: 1.72,
+            fireRate: 1.08,
+            speed: 0.84,
+            shield: 1.38
+        }
     },
+
     {
         id: "titan",
         name: "TITAN PRIME",
-        className: "HEAVY DREADWING",
-        rarity: "MYTHIC",
-        price: 120000,
-        unlockLevel: 20,
+        className: "LEGENDARY FLAGSHIP",
+        rarity: SHIP_RARITIES.ULTIMATE.label,
+
         texture: "ship_titan",
-        tint: 0xffffff,
-        description: "A mythic heavy fighter engineered to survive impossible sectors and crush bosses.",
-        ability: "Dreadnought Core",
-        stats: { damage: 1.58, fireRate: 0.94, speed: 0.8, shield: 1.72 }
+        tint: 0xfacc15,
+
+        price: 150000,
+        unlockLevel: 30,
+
+        description:
+            "The supreme JUDE flagship. Massive firepower, reinforced shielding, and elite command technology.",
+
+        ability:
+            "QUANTUM ANNIHILATION",
+
+        stats: {
+            damage: 1.8,
+            fireRate: 1.28,
+            speed: 1.02,
+            shield: 1.72
+        }
     }
 ];
 
-export function getShipById(id) {
-    return SHIP_CATALOG.find((ship) => ship.id === id) || SHIP_CATALOG[0];
+export function getShipById(shipId = "vanguard") {
+    return (
+        SHIP_CATALOG.find(
+            (ship) => ship.id === shipId
+        ) ||
+        SHIP_CATALOG[0]
+    );
+}
+
+export function getShipIndex(shipId = "vanguard") {
+    const index = SHIP_CATALOG.findIndex(
+        (ship) => ship.id === shipId
+    );
+
+    return index >= 0 ? index : 0;
+}
+
+export function getShipsByRarity(rarity) {
+    if (!rarity) {
+        return [...SHIP_CATALOG];
+    }
+
+    const normalized =
+        String(rarity).toUpperCase();
+
+    return SHIP_CATALOG.filter(
+        (ship) =>
+            String(ship.rarity).toUpperCase() ===
+            normalized
+    );
+}
+
+export function getUnlockedShipsForLevel(level = 1) {
+    const safeLevel = Math.max(
+        1,
+        Number(level) || 1
+    );
+
+    return SHIP_CATALOG.filter(
+        (ship) =>
+            safeLevel >= ship.unlockLevel
+    );
+}
+
+export function isValidShipId(shipId) {
+    return SHIP_CATALOG.some(
+        (ship) => ship.id === shipId
+    );
 }

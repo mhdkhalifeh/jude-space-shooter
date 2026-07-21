@@ -15,19 +15,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.shipConfig = shipConfig;
+       this.shipConfig = shipConfig;
 
-        this.setScale(0.12);
+this.setScale(0.12);
 
-        if (
-            this.shipConfig.tint &&
-            this.shipConfig.tint !== 0xffffff
-        ) {
-            this.setTint(this.shipConfig.tint);
-        }
+// بدون Tint أو تأثيرات لونية
+this.clearTint();
+this.setAlpha(1);
 
-        this.setDepth(10);
-        this.body.setCollideWorldBounds(true);
+this.setDepth(10);
+this.body.setCollideWorldBounds(true);
 
         this.moveSpeed =
             0.14 *
