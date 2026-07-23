@@ -15,12 +15,33 @@ export default class ProfileScene extends Phaser.Scene {
         this.achievementManager = new AchievementManager(this);
         this.xpManager = new XPManager(this);
 
-        this.cameras.main.setBackgroundColor("#020617");
+        this.stats = this.saveManager.getStats();
+        this.profile = this.xpManager.getProfileData();
 
+        this.cameras.main.setBackgroundColor("#020617");
+        this.createBackground(width, height);
+        this.createTopBar(width);
+        this.createDashboard(width, height);
+        this.createBackButton(height);
+
+        this.escKey = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.ESC
+        );
+
+        this.escHandler = () => this.goBack();
+        this.escKey.on("down", this.escHandler);
+
+        this.events.once("shutdown", () => {
+            this.escKey?.off("down", this.escHandler);
+        });
+    }
+
+    createBackground(width, height) {
         if (this.textures.exists("background_space")) {
             this.add.image(width / 2, height / 2, "background_space")
                 .setDisplaySize(width, height)
-                .setAlpha(0.42);
+                .setAlpha(0.58)
+                .setDepth(0);
         }
 
         this.add.rectangle(
@@ -29,152 +50,238 @@ export default class ProfileScene extends Phaser.Scene {
             width,
             height,
             0x020617,
-            0.74
-        );
-
-        this.createStars(width, height);
-        this.createHeader(width);
-        this.createProfileSummary(width);
-        this.createStatistics(width);
-        this.createAchievements(width, height);
-        this.createBackButton(width, height);
-    }
-
-    createHeader(width) {
-        this.add.text(
-            width / 2,
-            52,
-            "PLAYER PROFILE",
-            {
-                fontSize: "48px",
-                fontStyle: "bold",
-                color: "#38BDF8",
-                stroke: "#020617",
-                strokeThickness: 8
-            }
-        )
-            .setOrigin(0.5)
-            .setDepth(20);
-
-        this.add.text(
-            width / 2,
-            95,
-            "JUDE SPACE SHOOTER",
-            {
-                fontSize: "18px",
-                fontStyle: "bold",
-                color: "#94A3B8",
-                letterSpacing: 4
-            }
-        )
-            .setOrigin(0.5)
-            .setDepth(20);
-    }
-
-    createProfileSummary(width) {
-        const stats = this.saveManager.getStats();
-
-        const panelX = width / 2;
-        const panelY = 165;
-        const panelWidth = Math.min(1040, width - 80);
-        const panelHeight = 165;
-
-        this.createPanel(
-            panelX,
-            panelY,
-            panelWidth,
-            panelHeight,
-            0x38bdf8
-        );
-
-        const xp = this.xpManager.getProfileData();
-
-        const items = [
-            {
-                label: "PLAYER LEVEL",
-                value: `LEVEL ${xp.level}`,
-                color: "#FACC15"
-            },
-            {
-                label: "HIGH SCORE",
-                value: Number(stats.highScore || 0).toLocaleString("en-US"),
-                color: "#7DD3FC"
-            },
-            {
-                label: "HIGHEST STAGE",
-                value: `${stats.highestStage || 1} - ${stats.highestWave || 1}`,
-                color: "#C4B5FD"
-            },
-            {
-                label: "TOTAL RUNS",
-                value: String(stats.totalRuns || 0),
-                color: "#86EFAC"
-            },
-            {
-                label: "PLAY TIME",
-                value: this.saveManager.getPlayTimeFormatted(),
-                color: "#FCA5A5"
-            }
-        ];
-
-        const spacing = panelWidth / items.length;
-
-        items.forEach((item, index) => {
-            const x =
-                panelX -
-                panelWidth / 2 +
-                spacing * index +
-                spacing / 2;
-
-            this.add.text(
-                x,
-                panelY - 25,
-                item.label,
-                {
-                    fontSize: "13px",
-                    fontStyle: "bold",
-                    color: "#94A3B8",
-                    letterSpacing: 2
-                }
-            )
-                .setOrigin(0.5)
-                .setDepth(22);
-
-            this.add.text(
-                x,
-                panelY + 17,
-                item.value,
-                {
-                    fontSize: "30px",
-                    fontStyle: "bold",
-                    color: item.color,
-                    stroke: "#020617",
-                    strokeThickness: 5
-                }
-            )
-                .setOrigin(0.5)
-                .setDepth(22);
-        });
-
-        const xpBarWidth = Math.min(760, panelWidth - 120);
-        const xpBarY = panelY + 76;
+            0.68
+        ).setDepth(1);
 
         this.add.rectangle(
-            panelX,
-            xpBarY,
-            xpBarWidth,
-            10,
+            width * 0.18,
+            height / 2,
+            width * 0.36,
+            height,
+            0x07111f,
+            0.28
+        ).setDepth(2);
+
+        this.add.rectangle(
+            width * 0.82,
+            height / 2,
+            width * 0.36,
+            height,
+            0x0b1023,
+            0.2
+        ).setDepth(2);
+
+        const vignette = this.add.graphics().setDepth(3);
+        vignette.fillGradientStyle(
+            0x020617,
+            0x020617,
+            0x020617,
+            0x020617,
+            0.78,
+            0.78,
+            0.08,
+            0.08
+        );
+        vignette.fillRect(0, 0, width, height);
+
+        this.createStars(width, height);
+    }
+
+    createTopBar(width) {
+        const barHeight = 108;
+
+        this.add.rectangle(
+            width / 2,
+            barHeight / 2,
+            width,
+            barHeight,
+            0x050b16,
+            0.9
+        )
+            .setStrokeStyle(1, 0x1e3a5f, 0.9)
+            .setDepth(10);
+
+        this.add.rectangle(
+            5,
+            barHeight / 2,
+            4,
+            barHeight - 26,
+            0x38bdf8,
+            1
+        ).setDepth(11);
+
+        this.add.text(
+            42,
+            31,
+            "JUDE // PILOT DATABASE",
+            {
+                fontSize: "13px",
+                fontStyle: "bold",
+                color: "#64748B",
+                letterSpacing: 3
+            }
+        )
+            .setOrigin(0, 0.5)
+            .setDepth(12);
+
+        this.add.text(
+            40,
+            68,
+            "PLAYER PROFILE",
+            {
+                fontSize: "35px",
+                fontStyle: "bold",
+                color: "#EAF8FF",
+                stroke: "#020617",
+                strokeThickness: 5,
+                letterSpacing: 1
+            }
+        )
+            .setOrigin(0, 0.5)
+            .setDepth(12);
+
+        this.add.text(
+            width - 42,
+            39,
+            "JUDE SPACE SHOOTER",
+            {
+                fontSize: "15px",
+                fontStyle: "bold",
+                color: "#38BDF8",
+                letterSpacing: 3
+            }
+        )
+            .setOrigin(1, 0.5)
+            .setDepth(12);
+
+        this.add.text(
+            width - 42,
+            70,
+            "COMBAT RECORD // VERIFIED",
+            {
+                fontSize: "11px",
+                fontStyle: "bold",
+                color: "#475569",
+                letterSpacing: 2
+            }
+        )
+            .setOrigin(1, 0.5)
+            .setDepth(12);
+    }
+
+    createDashboard(width, height) {
+        const margin = Math.max(26, Math.min(48, width * 0.025));
+        const gap = Math.max(16, Math.min(24, width * 0.014));
+        const top = 128;
+        const bottom = height - 92;
+        const availableHeight = bottom - top;
+        const achievementsHeight = Math.max(
+            144,
+            Math.min(178, availableHeight * 0.24)
+        );
+        const upperHeight = availableHeight - achievementsHeight - gap;
+        const contentWidth = width - margin * 2;
+        const leftWidth = Math.max(
+            330,
+            Math.min(450, contentWidth * 0.31)
+        );
+        const rightWidth = contentWidth - leftWidth - gap;
+
+        const leftX = margin + leftWidth / 2;
+        const rightX = margin + leftWidth + gap + rightWidth / 2;
+        const upperY = top + upperHeight / 2;
+
+        this.createPilotCard(
+            leftX,
+            upperY,
+            leftWidth,
+            upperHeight
+        );
+
+        this.createCombatCard(
+            rightX,
+            upperY,
+            rightWidth,
+            upperHeight
+        );
+
+        this.createAchievements(
+            width / 2,
+            top + upperHeight + gap + achievementsHeight / 2,
+            contentWidth,
+            achievementsHeight
+        );
+    }
+
+    createPilotCard(x, y, width, height) {
+        this.createPanel(x, y, width, height, 0x38bdf8);
+
+        const left = x - width / 2;
+        const top = y - height / 2;
+        const pad = Math.max(22, width * 0.065);
+
+        this.createSectionHeader(
+            left + pad,
+            top + 30,
+            "PILOT DOSSIER",
+            "01",
+            "#38BDF8"
+        );
+
+        this.add.text(
+            x,
+            top + height * 0.22,
+            `LEVEL ${this.profile.level}`,
+            {
+                fontSize: `${Math.max(31, Math.min(46, width * 0.1))}px`,
+                fontStyle: "bold",
+                color: "#FACC15",
+                stroke: "#020617",
+                strokeThickness: 6
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(22);
+
+        this.add.text(
+            x,
+            top + height * 0.31,
+            "CURRENT PILOT RANK",
+            {
+                fontSize: "11px",
+                fontStyle: "bold",
+                color: "#64748B",
+                letterSpacing: 3
+            }
+        )
+            .setOrigin(0.5)
+            .setDepth(22);
+
+        const barWidth = width - pad * 2;
+        const barY = top + height * 0.39;
+        const progress = Phaser.Math.Clamp(
+            Number(this.profile.progress) || 0,
+            0,
+            1
+        );
+
+        this.add.rectangle(
+            left + pad,
+            barY,
+            barWidth,
+            12,
             0x0f172a,
             1
         )
+            .setOrigin(0, 0.5)
             .setStrokeStyle(1, 0x334155, 1)
             .setDepth(22);
 
         this.add.rectangle(
-            panelX - xpBarWidth / 2,
-            xpBarY,
-            xpBarWidth * xp.progress,
-            10,
+            left + pad,
+            barY,
+            Math.max(3, barWidth * progress),
+            12,
             0xfacc15,
             1
         )
@@ -182,143 +289,94 @@ export default class ProfileScene extends Phaser.Scene {
             .setDepth(23);
 
         this.add.text(
-            panelX,
-            xpBarY + 18,
-            `${xp.currentXP} / ${xp.requiredXP} XP`,
+            left + pad,
+            barY + 20,
+            `${this.profile.currentXP} XP`,
             {
-                fontSize: "12px",
+                fontSize: "11px",
                 fontStyle: "bold",
                 color: "#FDE68A"
             }
         )
-            .setOrigin(0.5)
+            .setOrigin(0, 0)
             .setDepth(23);
-    }
-
-    createStatistics(width) {
-        const stats = this.saveManager.getStats();
-
-        const leftX = width / 2 - 270;
-        const rightX = width / 2 + 270;
-        const startY = 285;
 
         this.add.text(
-            width / 2,
-            255,
-            "COMBAT STATISTICS",
+            left + width - pad,
+            barY + 20,
+            `${this.profile.requiredXP} XP`,
             {
-                fontSize: "25px",
+                fontSize: "11px",
                 fontStyle: "bold",
-                color: "#E2E8F0",
-                stroke: "#020617",
-                strokeThickness: 5
+                color: "#64748B"
             }
         )
-            .setOrigin(0.5)
-            .setDepth(20);
+            .setOrigin(1, 0)
+            .setDepth(23);
 
-        const leftStats = [
-            ["Enemies Destroyed", stats.enemiesKilled || 0],
-            ["Elite Enemies", stats.eliteEnemiesKilled || 0],
-            ["Bosses Defeated", stats.bossesKilled || 0],
-            ["Shots Fired", stats.shotsFired || 0]
+        const summaryTop = top + height * 0.53;
+        const summaryHeight = height * 0.37;
+        const rowGap = summaryHeight / 4;
+
+        const items = [
+            [
+                "HIGH SCORE",
+                Number(this.stats.highScore || 0).toLocaleString("en-US"),
+                "#7DD3FC"
+            ],
+            [
+                "HIGHEST SECTOR",
+                `${this.stats.highestStage || 1} / ${this.stats.highestWave || 1}`,
+                "#C4B5FD"
+            ],
+            [
+                "TOTAL RUNS",
+                String(this.stats.totalRuns || 0),
+                "#86EFAC"
+            ],
+            [
+                "FLIGHT TIME",
+                this.saveManager.getPlayTimeFormatted(),
+                "#FCA5A5"
+            ]
         ];
 
-        const rightStats = [
-            ["Power-Ups Collected", stats.powerUpsCollected || 0],
-            ["Shields Collected", stats.shieldsCollected || 0],
-            ["Double Lasers", stats.doubleLasersCollected || 0],
-            ["Damage Taken", stats.damageTaken || 0]
-        ];
+        items.forEach((item, index) => {
+            const rowY = summaryTop + rowGap * index;
 
-        this.createStatColumn(leftX, startY, leftStats, 0x38bdf8);
-        this.createStatColumn(rightX, startY, rightStats, 0xa78bfa);
-
-        const bossY = startY + 190;
-
-        this.add.text(
-            width / 2,
-            bossY - 12,
-            "BOSS RECORD",
-            {
-                fontSize: "18px",
-                fontStyle: "bold",
-                color: "#FCA5A5",
-                letterSpacing: 2
+            if (index > 0) {
+                this.add.rectangle(
+                    x,
+                    rowY - rowGap / 2,
+                    width - pad * 2,
+                    1,
+                    0x1e293b,
+                    0.85
+                ).setDepth(21);
             }
-        )
-            .setOrigin(0.5)
-            .setDepth(20);
-
-        const bossData = [
-            ["ALPHA", stats.bosses?.alpha || 0, "#FF6B6B"],
-            ["OMEGA", stats.bosses?.omega || 0, "#C4B5FD"],
-            ["LEVIATHAN", stats.bosses?.leviathan || 0, "#86EFAC"]
-        ];
-
-        bossData.forEach((boss, index) => {
-            const x = width / 2 + (index - 1) * 180;
 
             this.add.text(
-                x,
-                bossY + 26,
-                boss[0],
-                {
-                    fontSize: "14px",
-                    fontStyle: "bold",
-                    color: boss[2]
-                }
-            )
-                .setOrigin(0.5)
-                .setDepth(20);
-
-            this.add.text(
-                x,
-                bossY + 58,
-                String(boss[1]),
-                {
-                    fontSize: "26px",
-                    fontStyle: "bold",
-                    color: "#FFFFFF"
-                }
-            )
-                .setOrigin(0.5)
-                .setDepth(20);
-        });
-    }
-
-    createStatColumn(x, y, data, borderColor) {
-        this.createPanel(
-            x,
-            y + 70,
-            460,
-            170,
-            borderColor
-        );
-
-        data.forEach((item, index) => {
-            const rowY = y + index * 38;
-
-            this.add.text(
-                x - 190,
+                left + pad,
                 rowY,
                 item[0],
                 {
-                    fontSize: "16px",
-                    color: "#CBD5E1"
+                    fontSize: "12px",
+                    fontStyle: "bold",
+                    color: "#94A3B8",
+                    letterSpacing: 1
                 }
             )
                 .setOrigin(0, 0.5)
                 .setDepth(22);
 
             this.add.text(
-                x + 190,
+                left + width - pad,
                 rowY,
-                Number(item[1]).toLocaleString("en-US"),
+                item[1],
                 {
-                    fontSize: "18px",
+                    fontSize: "21px",
                     fontStyle: "bold",
-                    color: "#FFFFFF"
+                    color: item[2]
                 }
             )
                 .setOrigin(1, 0.5)
@@ -326,93 +384,320 @@ export default class ProfileScene extends Phaser.Scene {
         });
     }
 
-    createAchievements(width, height) {
-        const definitions =
-            this.achievementManager.getDefinitions();
+    createCombatCard(x, y, width, height) {
+        this.createPanel(x, y, width, height, 0xa78bfa);
 
-        const unlocked =
-            this.saveManager.getUnlockedAchievements();
+        const left = x - width / 2;
+        const top = y - height / 2;
+        const pad = Math.max(22, Math.min(32, width * 0.035));
 
-        const unlockedIds =
-            new Set(unlocked.map((item) => item.id));
+        this.createSectionHeader(
+            left + pad,
+            top + 30,
+            "COMBAT TELEMETRY",
+            "02",
+            "#C4B5FD"
+        );
 
-        const y = height - 150;
+        const bossHeight = Math.max(112, height * 0.25);
+        const statsTop = top + 62;
+        const statsBottom = top + height - bossHeight - 18;
+        const statsHeight = statsBottom - statsTop;
+        const statsGap = 12;
+        const statWidth = (width - pad * 2 - statsGap) / 2;
+
+        const leftStats = [
+            ["ENEMIES DESTROYED", this.stats.enemiesKilled || 0],
+            ["ELITE ENEMIES", this.stats.eliteEnemiesKilled || 0],
+            ["BOSSES DEFEATED", this.stats.bossesKilled || 0],
+            ["SHOTS FIRED", this.stats.shotsFired || 0]
+        ];
+
+        const rightStats = [
+            ["POWER-UPS COLLECTED", this.stats.powerUpsCollected || 0],
+            ["SHIELDS COLLECTED", this.stats.shieldsCollected || 0],
+            ["DOUBLE LASERS", this.stats.doubleLasersCollected || 0],
+            ["DAMAGE TAKEN", this.stats.damageTaken || 0]
+        ];
+
+        this.createStatGrid(
+            left + pad,
+            statsTop,
+            statWidth,
+            statsHeight,
+            leftStats,
+            0x38bdf8
+        );
+
+        this.createStatGrid(
+            left + pad + statWidth + statsGap,
+            statsTop,
+            statWidth,
+            statsHeight,
+            rightStats,
+            0xa78bfa
+        );
+
+        const bossTop = statsBottom + 12;
+        this.createBossRecord(
+            left + pad,
+            bossTop,
+            width - pad * 2,
+            top + height - 16 - bossTop
+        );
+    }
+
+    createStatGrid(x, y, width, height, data, accentColor) {
+        const rowGap = 8;
+        const rowHeight = (height - rowGap * 3) / 4;
+
+        data.forEach((item, index) => {
+            const rowY = y + index * (rowHeight + rowGap);
+
+            this.add.rectangle(
+                x,
+                rowY,
+                width,
+                rowHeight,
+                0x0b1422,
+                0.9
+            )
+                .setOrigin(0, 0)
+                .setStrokeStyle(1, 0x243447, 0.8)
+                .setDepth(21);
+
+            this.add.rectangle(
+                x,
+                rowY,
+                3,
+                rowHeight,
+                accentColor,
+                0.9
+            )
+                .setOrigin(0, 0)
+                .setDepth(22);
+
+            this.add.text(
+                x + 16,
+                rowY + rowHeight / 2,
+                item[0],
+                {
+                    fontSize: `${Math.max(10, Math.min(13, width * 0.038))}px`,
+                    fontStyle: "bold",
+                    color: "#94A3B8"
+                }
+            )
+                .setOrigin(0, 0.5)
+                .setDepth(22);
+
+            this.add.text(
+                x + width - 15,
+                rowY + rowHeight / 2,
+                Number(item[1]).toLocaleString("en-US"),
+                {
+                    fontSize: `${Math.max(16, Math.min(21, rowHeight * 0.48))}px`,
+                    fontStyle: "bold",
+                    color: "#F8FAFC"
+                }
+            )
+                .setOrigin(1, 0.5)
+                .setDepth(22);
+        });
+    }
+
+    createBossRecord(x, y, width, height) {
+        this.add.rectangle(
+            x,
+            y,
+            width,
+            height,
+            0x0a101d,
+            0.92
+        )
+            .setOrigin(0, 0)
+            .setStrokeStyle(1, 0x3f1d2e, 1)
+            .setDepth(21);
 
         this.add.text(
-            width / 2,
-            y - 85,
-            `ACHIEVEMENTS  ${unlocked.length}/${definitions.length}`,
+            x + 16,
+            y + 17,
+            "BOSS RECORD",
             {
-                fontSize: "24px",
+                fontSize: "11px",
                 fontStyle: "bold",
-                color: "#FACC15",
-                stroke: "#020617",
-                strokeThickness: 5
+                color: "#FCA5A5",
+                letterSpacing: 2
             }
         )
-            .setOrigin(0.5)
-            .setDepth(20);
+            .setOrigin(0, 0.5)
+            .setDepth(22);
 
-        const visibleAchievements = definitions.slice(0, 7);
-        const spacing = Math.min(150, (width - 120) / visibleAchievements.length);
+        const bosses = [
+            ["ALPHA", this.stats.bosses?.alpha || 0, "#FF7B7B"],
+            ["OMEGA", this.stats.bosses?.omega || 0, "#C4B5FD"],
+            ["LEVIATHAN", this.stats.bosses?.leviathan || 0, "#86EFAC"]
+        ];
 
-        visibleAchievements.forEach((achievement, index) => {
-            const isUnlocked = unlockedIds.has(achievement.id);
+        const startX = x + width * 0.37;
+        const usableWidth = width * 0.59;
 
-            const x =
-                width / 2 -
-                ((visibleAchievements.length - 1) * spacing) / 2 +
-                index * spacing;
+        bosses.forEach((boss, index) => {
+            const bossX =
+                startX +
+                (usableWidth / bosses.length) * index +
+                usableWidth / bosses.length / 2;
 
-            const circle = this.add.circle(
-                x,
-                y,
-                42,
-                isUnlocked ? 0x302408 : 0x111827,
-                0.95
-            )
-                .setStrokeStyle(
-                    3,
-                    isUnlocked ? 0xfacc15 : 0x334155,
-                    isUnlocked ? 1 : 0.7
-                )
-                .setDepth(20);
-
-            const icon = this.add.text(
-                x,
-                y - 2,
-                isUnlocked ? achievement.icon : "🔒",
+            this.add.text(
+                bossX,
+                y + height * 0.36,
+                boss[0],
                 {
-                    fontSize: "27px"
+                    fontSize: "11px",
+                    fontStyle: "bold",
+                    color: boss[2],
+                    letterSpacing: 1
                 }
             )
                 .setOrigin(0.5)
+                .setDepth(22);
+
+            this.add.text(
+                bossX,
+                y + height * 0.68,
+                String(boss[1]),
+                {
+                    fontSize: `${Math.max(20, Math.min(28, height * 0.28))}px`,
+                    fontStyle: "bold",
+                    color: "#FFFFFF"
+                }
+            )
+                .setOrigin(0.5)
+                .setDepth(22);
+        });
+    }
+
+    createAchievements(x, y, width, height) {
+        this.createPanel(x, y, width, height, 0xfacc15);
+
+        const definitions =
+            this.achievementManager.getDefinitions() || [];
+        const unlocked =
+            this.saveManager.getUnlockedAchievements() || [];
+        const unlockedIds =
+            new Set(unlocked.map((item) => item.id));
+        const visibleAchievements = definitions.slice(0, 7);
+        const left = x - width / 2;
+        const top = y - height / 2;
+        const pad = 22;
+
+        this.createSectionHeader(
+            left + pad,
+            top + 25,
+            `ACHIEVEMENTS  ${unlocked.length}/${definitions.length}`,
+            "03",
+            "#FACC15"
+        );
+
+        if (visibleAchievements.length === 0) {
+            this.add.text(
+                x,
+                y + 12,
+                "NO ACHIEVEMENTS AVAILABLE",
+                {
+                    fontSize: "13px",
+                    fontStyle: "bold",
+                    color: "#64748B",
+                    letterSpacing: 2
+                }
+            )
+                .setOrigin(0.5)
+                .setDepth(22);
+            return;
+        }
+
+        const cardGap = 10;
+        const cardTop = top + 52;
+        const cardHeight = height - 65;
+        const cardWidth =
+            (width - pad * 2 - cardGap * (visibleAchievements.length - 1)) /
+            visibleAchievements.length;
+
+        visibleAchievements.forEach((achievement, index) => {
+            const isUnlocked = unlockedIds.has(achievement.id);
+            const cardX =
+                left + pad + index * (cardWidth + cardGap);
+
+            this.add.rectangle(
+                cardX,
+                cardTop,
+                cardWidth,
+                cardHeight,
+                isUnlocked ? 0x1a170a : 0x0b1220,
+                0.94
+            )
+                .setOrigin(0, 0)
+                .setStrokeStyle(
+                    1,
+                    isUnlocked ? 0xfacc15 : 0x26364a,
+                    isUnlocked ? 0.95 : 0.8
+                )
                 .setDepth(21);
 
-            const title = this.add.text(
-                x,
-                y + 58,
+            const iconY = cardTop + cardHeight * 0.38;
+            const iconRadius = Math.max(
+                18,
+                Math.min(27, cardHeight * 0.25)
+            );
+
+            const badge = this.add.circle(
+                cardX + cardWidth / 2,
+                iconY,
+                iconRadius,
+                isUnlocked ? 0x302408 : 0x111827,
+                1
+            )
+                .setStrokeStyle(
+                    2,
+                    isUnlocked ? 0xfacc15 : 0x334155,
+                    1
+                )
+                .setDepth(22);
+
+            const icon = this.add.text(
+                cardX + cardWidth / 2,
+                iconY,
+                isUnlocked ? achievement.icon : "◆",
+                {
+                    fontSize: `${Math.max(16, iconRadius * 0.9)}px`,
+                    color: isUnlocked ? "#FFFFFF" : "#475569"
+                }
+            )
+                .setOrigin(0.5)
+                .setDepth(23);
+
+            this.add.text(
+                cardX + cardWidth / 2,
+                cardTop + cardHeight * 0.78,
                 achievement.title,
                 {
-                    fontSize: "10px",
+                    fontSize: `${Math.max(8, Math.min(11, cardWidth * 0.075))}px`,
                     fontStyle: "bold",
                     color: isUnlocked ? "#FDE68A" : "#64748B",
                     align: "center",
                     wordWrap: {
-                        width: 125,
+                        width: Math.max(60, cardWidth - 12),
                         useAdvancedWrap: true
                     }
                 }
             )
-                .setOrigin(0.5, 0)
-                .setDepth(21);
+                .setOrigin(0.5)
+                .setDepth(23);
 
             if (isUnlocked) {
                 this.tweens.add({
-                    targets: [circle, icon],
-                    scaleX: 1.06,
-                    scaleY: 1.06,
-                    duration: 900,
+                    targets: [badge, icon],
+                    alpha: { from: 0.72, to: 1 },
+                    duration: 1100 + index * 80,
                     yoyo: true,
                     repeat: -1,
                     ease: "Sine.easeInOut"
@@ -421,87 +706,156 @@ export default class ProfileScene extends Phaser.Scene {
         });
     }
 
+    createSectionHeader(x, y, label, number, color) {
+        this.add.text(
+            x,
+            y,
+            number,
+            {
+                fontSize: "10px",
+                fontStyle: "bold",
+                color,
+                backgroundColor: "#0F172A",
+                padding: {
+                    left: 7,
+                    right: 7,
+                    top: 4,
+                    bottom: 4
+                }
+            }
+        )
+            .setOrigin(0, 0.5)
+            .setDepth(23);
+
+        this.add.text(
+            x + 40,
+            y,
+            label,
+            {
+                fontSize: "13px",
+                fontStyle: "bold",
+                color: "#E2E8F0",
+                letterSpacing: 2
+            }
+        )
+            .setOrigin(0, 0.5)
+            .setDepth(23);
+    }
+
     createPanel(x, y, width, height, borderColor) {
-        const shadow = this.add.rectangle(
-            x + 7,
-            y + 8,
+        this.add.rectangle(
+            x + 6,
+            y + 7,
             width,
             height,
             0x000000,
-            0.38
+            0.42
         ).setDepth(18);
 
-        const panel = this.add.rectangle(
+        this.add.rectangle(
             x,
             y,
             width,
             height,
             0x07111f,
-            0.88
+            0.93
         )
-            .setStrokeStyle(2, borderColor, 0.6)
+            .setStrokeStyle(1, borderColor, 0.65)
             .setDepth(19);
 
-        return { shadow, panel };
+        this.add.rectangle(
+            x - width / 2,
+            y - height / 2,
+            4,
+            Math.min(54, height * 0.3),
+            borderColor,
+            1
+        )
+            .setOrigin(0, 0)
+            .setDepth(20);
     }
 
-    createBackButton(width, height) {
-        const button = this.add.text(
-            38,
-            height - 42,
-            "← BACK",
-            {
-                fontSize: "22px",
-                fontStyle: "bold",
-                color: "#FFFFFF",
-                backgroundColor: "#0F172A",
-                padding: {
-                    left: 18,
-                    right: 18,
-                    top: 10,
-                    bottom: 10
-                },
-                stroke: "#020617",
-                strokeThickness: 4
-            }
-        )
-            .setOrigin(0, 1)
-            .setDepth(30)
+    createBackButton(height) {
+        const button = this.add.container(40, height - 48)
+            .setDepth(40)
+            .setSize(150, 46)
             .setInteractive({ useHandCursor: true });
 
+        const bg = this.add.rectangle(
+            0,
+            0,
+            150,
+            46,
+            0x0b1422,
+            0.96
+        ).setStrokeStyle(1, 0x38bdf8, 0.8);
+
+        const accent = this.add.rectangle(
+            -75,
+            0,
+            4,
+            46,
+            0x38bdf8,
+            1
+        ).setOrigin(0, 0.5);
+
+        const text = this.add.text(
+            0,
+            0,
+            "←  BACK",
+            {
+                fontSize: "17px",
+                fontStyle: "bold",
+                color: "#EAF8FF",
+                letterSpacing: 1
+            }
+        ).setOrigin(0.5);
+
+        button.add([bg, accent, text]);
+
         button.on("pointerover", () => {
-            button.setColor("#7DD3FC");
-            button.setScale(1.05);
+            bg.setFillStyle(0x10263a, 1);
+            bg.setStrokeStyle(1, 0x7dd3fc, 1);
+            text.setColor("#7DD3FC");
         });
 
         button.on("pointerout", () => {
-            button.setColor("#FFFFFF");
-            button.setScale(1);
+            bg.setFillStyle(0x0b1422, 0.96);
+            bg.setStrokeStyle(1, 0x38bdf8, 0.8);
+            text.setColor("#EAF8FF");
         });
 
         button.on("pointerdown", () => {
-            this.scene.start("MenuScene");
-        });
-
-        this.input.keyboard.once("keydown-ESC", () => {
-            this.scene.start("MenuScene");
+            this.soundManager?.sfx?.("button", 0.4);
+            this.goBack();
         });
     }
 
+    goBack() {
+        if (this.scene.isActive("ProfileScene")) {
+            this.scene.start("MenuScene");
+        }
+    }
+
     createStars(width, height) {
-        for (let i = 0; i < 70; i++) {
+        const starCount = Math.max(
+            36,
+            Math.min(75, Math.round((width * height) / 26000))
+        );
+
+        for (let i = 0; i < starCount; i++) {
             const star = this.add.circle(
                 Phaser.Math.Between(0, width),
-                Phaser.Math.Between(0, height),
-                Phaser.Math.FloatBetween(0.6, 1.8),
+                Phaser.Math.Between(112, height),
+                Phaser.Math.FloatBetween(0.5, 1.5),
                 0xffffff,
-                Phaser.Math.FloatBetween(0.15, 0.5)
-            ).setDepth(2);
+                Phaser.Math.FloatBetween(0.1, 0.38)
+            ).setDepth(4);
 
             this.tweens.add({
                 targets: star,
-                alpha: Phaser.Math.FloatBetween(0.05, 0.7),
-                duration: Phaser.Math.Between(900, 2400),
+                alpha: Phaser.Math.FloatBetween(0.04, 0.55),
+                duration: Phaser.Math.Between(1100, 2600),
                 yoyo: true,
                 repeat: -1
             });
